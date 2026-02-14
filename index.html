@@ -3,26 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Language Learning Hub</title>
+    <title>Grade 3 Fun Chinese Learning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --primary: #f59e0b; --bg: #0f172a; --card: #ffffff; }
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); color: #f1f5f9; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { background: #1e293b; border-right: 1px solid #334155; }
-        .flashcard { background: var(--card); border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        .chinese-char { font-size: clamp(80px, 15vw, 140px); line-height: 1; font-family: "Microsoft JhengHei", sans-serif; cursor: pointer; }
-        .audio-btn-main { transition: all 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+        :root { --primary: #FF9F43; --bg: #fffbeb; --card: #ffffff; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); color: #1e293b; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { background: #ffffff; border-right: 4px solid #fbbf24; }
+        .flashcard { background: var(--card); border-radius: 40px; box-shadow: 0 15px 40px rgba(251, 191, 36, 0.15); border: 2px solid #ffffff; }
+        .chinese-char { font-size: clamp(80px, 15vw, 140px); line-height: 1; font-family: "Microsoft JhengHei", sans-serif; cursor: pointer; color: #3b82f6; transition: transform 0.2s; }
+        .chinese-char:active { transform: scale(0.9); }
+        .audio-btn-main { transition: all 0.2s; box-shadow: 0 6px 0 rgba(0,0,0,0.05); }
         .audio-btn-main:active { transform: translateY(4px); box-shadow: none; }
-        .star-btn { font-size: 28px; transition: transform 0.2s; }
-        .star-active { color: #fbbf24 !important; filter: drop-shadow(0 0 8px #fbbf24); }
-        .ai-chat-msg { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 12px; margin-bottom: 15px; position: relative; }
-        .speaker-sm { background: #334155; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; }
+        .star-btn { font-size: 32px; transition: transform 0.2s; }
+        .star-active { color: #fbbf24 !important; filter: drop-shadow(0 0 10px #fbbf24); }
+        .ai-chat-msg { background: #fefce8; border: 2px solid #fef3c7; border-radius: 24px; padding: 16px; margin-bottom: 15px; position: relative; color: #475569; font-size: 14px; }
+        .speaker-sm { background: #fbbf24; color: white; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
+        .category-btn { background: #ffffff; border: 2px solid #fef3c7; color: #94a3b8; transition: all 0.2s; }
+        .category-btn:hover { border-color: #fbbf24; color: #b45309; }
+        .category-active { background: #fbbf24 !important; color: #ffffff !important; border-color: #d97706 !important; box-shadow: 0 4px 0 #d97706; font-weight: 900; }
         
         @media (max-width: 1024px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #334155; }
-            .main-content { min-height: 100vh; }
-            .ai-sidebar { height: 500px; border-left: none; border-top: 1px solid #334155; }
+            .sidebar { width: 100%; border-right: none; height: auto; border-bottom: 4px solid #fbbf24; }
+            .main-content { min-height: 100vh; padding: 20px; }
+            .ai-sidebar { height: 500px; border-left: none; border-top: 4px solid #fbbf24; }
         }
     </style>
 </head>
@@ -30,71 +34,70 @@
 
     <!-- Sidebar -->
     <aside class="sidebar w-80 p-6 flex flex-col gap-8 shrink-0">
-        <div>
-            <h1 class="text-2xl font-black italic tracking-tighter text-amber-500 uppercase">Learning Core</h1>
-            <p class="text-slate-500 text-[10px] font-mono tracking-widest uppercase">G3 Module | Secured</p>
-        </div>
+        <header>
+            <h1 class="text-3xl font-black italic tracking-tighter text-orange-500 uppercase leading-none">Funny<br>Chinese</h1>
+            <p class="text-amber-400 text-[10px] font-bold tracking-widest uppercase mt-2">Grade 3 Explorer</p>
+        </header>
 
         <div>
-            <label class="text-[10px] font-bold text-slate-500 uppercase mb-4 block">Mastery Progress</label>
-            <div class="bg-slate-800 h-2 w-full rounded-full overflow-hidden mb-2">
-                <div id="progress-bar" class="bg-amber-500 h-full w-0 transition-all duration-500"></div>
+            <label class="text-[10px] font-black text-amber-600 uppercase mb-4 block tracking-widest">Your Stars ⭐</label>
+            <div class="bg-amber-100 h-3 w-full rounded-full overflow-hidden mb-2 shadow-inner">
+                <div id="progress-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-full w-0 transition-all duration-1000 ease-out"></div>
             </div>
-            <div class="flex justify-between text-[10px] font-mono text-slate-400">
-                <span id="progress-text">0 / 50 Learned</span>
+            <div class="flex justify-between text-[10px] font-black text-amber-700">
+                <span id="progress-text">0 / 50 Words</span>
                 <span id="progress-percent">0%</span>
             </div>
         </div>
 
-        <nav class="space-y-2 overflow-y-auto pr-2">
-            <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Modules</label>
-            <button onclick="changeCategory('All')" class="w-full text-left p-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-sm text-white">🌐 Open All</button>
-            <button onclick="changeCategory('Nature')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-blue-400 text-sm italic">🌿 Nature</button>
-            <button onclick="changeCategory('Health')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-emerald-400 text-sm italic">💪 Health</button>
-            <button onclick="changeCategory('Food')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-orange-400 text-sm italic">🍎 Food</button>
-            <button onclick="changeCategory('Animals')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-red-400 text-sm italic">🦁 Animals</button>
-            <button onclick="changeCategory('School')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-purple-400 text-sm italic">📚 School</button>
+        <nav class="space-y-3 overflow-y-auto pr-2">
+            <button id="btn-All" onclick="changeCategory('All')" class="category-btn w-full text-left p-3 rounded-2xl text-sm category-active">🌈 Universal Hub</button>
+            <button id="btn-Nature" onclick="changeCategory('Nature')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🌿 Forest & Sky</button>
+            <button id="btn-Health" onclick="changeCategory('Health')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🦸 Strong Body</button>
+            <button id="btn-Food" onclick="changeCategory('Food')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🥪 Yonder Food</button>
+            <button id="btn-Animals" onclick="changeCategory('Animals')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🦁 Animal Friends</button>
+            <button id="btn-School" onclick="changeCategory('School')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🏫 Fun School</button>
         </nav>
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content flex-grow p-6 lg:p-12 flex flex-col items-center justify-center">
-        <div id="flashcard" class="flashcard w-full max-w-xl p-8 lg:p-12 text-center relative overflow-hidden text-slate-900">
-            <button onclick="toggleStar()" id="star-btn" class="absolute top-6 right-6 text-slate-200 star-btn">⭐</button>
+    <main class="main-content flex-grow flex flex-col items-center justify-center p-6 bg-amber-50/30">
+        <div id="flashcard" class="w-full max-w-lg p-8 lg:p-12 text-center relative flashcard text-slate-900">
+            <button onclick="toggleStar()" id="star-btn" class="absolute top-6 right-6 text-slate-200 star-btn hover:scale-125">⭐</button>
             
-            <div id="pinyin" class="text-slate-400 text-xl font-medium mb-2 tracking-widest uppercase">Loading</div>
-            <div id="char" class="chinese-char font-black text-blue-600 mb-4" onclick="speakText(currentWord.char, 'hk')"></div>
-            <div id="radical" class="inline-block px-3 py-1 bg-slate-100 rounded-full text-[10px] font-black text-slate-400 mb-6 uppercase tracking-wider"></div>
-            <div id="meaning" class="text-3xl font-black uppercase text-slate-800 mb-8 tracking-tighter italic"></div>
+            <div id="pinyin" class="text-amber-400 text-2xl font-bold mb-2 tracking-widest italic">Loading...</div>
+            <div id="char" class="chinese-char font-black mb-4 drop-shadow-xl" onclick="speakText(currentWord.char, 'hk')"></div>
+            <div id="radical" class="inline-block px-4 py-1 bg-blue-50 rounded-full text-[10px] font-black text-blue-400 mb-8 uppercase tracking-widest border border-blue-100"></div>
+            <div id="meaning" class="text-4xl font-black uppercase text-slate-800 mb-10 tracking-tighter"></div>
             
-            <div class="border-t border-slate-100 pt-8 text-left">
+            <div class="border-t border-amber-100 pt-8 text-left">
                 <div class="flex items-start gap-3 mb-2">
-                    <p id="example" class="text-xl font-bold text-slate-700 leading-tight"></p>
-                    <button onclick="speakText(currentWord.example, 'hk')" class="mt-1 bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-[10px]">🔊</button>
+                    <p id="example" class="text-xl font-bold text-slate-600 leading-tight"></p>
+                    <button onclick="speakText(currentWord.example, 'hk')" class="mt-1 bg-amber-400 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-sm">🔊</button>
                 </div>
-                <div style="display:flex; align-items:start; gap:8px">
-                    <p id="example-trans" class="text-sm italic text-slate-400"></p>
-                    <button onclick="speakText(currentWord.exampleTrans, 'en')" class="mt-1 bg-slate-50 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center text-[8px]">🔊</button>
+                <div class="flex items-start gap-3">
+                    <p id="example-trans" class="text-sm font-medium text-slate-400 italic"></p>
+                    <button onclick="speakText(currentWord.exampleTrans, 'en')" class="mt-1 bg-blue-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px] shadow-sm">🔊</button>
                 </div>
             </div>
         </div>
 
-        <div class="w-full max-w-xl mt-8 grid grid-cols-2 gap-4">
-            <button onclick="speakText(currentWord.char, 'hk')" class="audio-btn-main py-4 bg-orange-500 hover:bg-orange-400 rounded-2xl font-black text-white uppercase text-sm">📢 Cantonese</button>
-            <button onclick="speakText(currentWord.char, 'cn')" class="audio-btn-main py-4 bg-sky-500 hover:bg-sky-400 rounded-2xl font-black text-white uppercase text-sm">📢 Mandarin</button>
-            <button onclick="nextCard()" class="col-span-2 py-5 bg-slate-100 hover:bg-white text-slate-900 rounded-2xl font-black text-xl border-b-4 border-slate-300 active:border-0 active:translate-y-1 transition-all">NEXT WORD &rarr;</button>
+        <div class="w-full max-w-lg mt-10 grid grid-cols-2 gap-4">
+            <button onclick="speakText(currentWord.char, 'hk')" class="audio-btn-main py-4 bg-orange-500 hover:bg-orange-400 rounded-[24px] font-black text-white uppercase text-sm border-b-4 border-orange-700 italic">🔊 Cantonese</button>
+            <button onclick="speakText(currentWord.char, 'cn')" class="audio-btn-main py-4 bg-sky-500 hover:bg-sky-400 rounded-[24px] font-black text-white uppercase text-sm border-b-4 border-sky-700 italic">🔊 Mandarin</button>
+            <button onclick="nextCard()" class="col-span-2 py-6 bg-white hover:bg-slate-50 text-slate-900 rounded-[24px] font-black text-2xl border-b-8 border-slate-200 active:border-0 active:translate-y-2 transition-all shadow-xl tracking-tighter">SURPRISE ME &rarr;</button>
         </div>
     </main>
 
     <!-- AI Sidebar -->
     <aside class="ai-sidebar w-full lg:w-96 p-6 sidebar flex flex-col shrink-0">
-        <header class="mb-6"><h3 class="font-bold flex items-center gap-2">🤖 AI BOT <span class="bg-blue-500/20 text-blue-400 text-[8px] px-1 rounded uppercase font-mono">SECURED</span></h3></header>
-        <div id="chat-history" class="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
-            <div class="ai-chat-msg text-slate-400 text-sm italic">Select a word and ask me for details!</div>
+        <header class="mb-6"><h3 class="font-black flex items-center gap-2 text-slate-700">🤖 AI TUTOR <span class="bg-green-500 text-white text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Online</span></h3></header>
+        <div id="chat-history" class="flex-grow overflow-y-auto mb-4 space-y-4 pr-2 scrollbar-none rounded-3xl p-4 bg-slate-50/50">
+            <div class="ai-chat-msg italic">Hi! I'm your magic helper. Click anything to start!</div>
         </div>
         <div class="flex gap-2">
-            <input type="text" id="user-input" placeholder="Type..." class="flex-grow bg-slate-800 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-amber-500">
-            <button onclick="sendMessage()" class="bg-amber-500 text-slate-900 font-bold px-4 rounded-xl uppercase text-xs">Ask</button>
+            <input type="text" id="user-input" placeholder="Ask a fun question..." class="flex-grow bg-white border-2 border-amber-100 p-4 rounded-2xl text-sm focus:outline-none focus:border-amber-400 shadow-sm transition-all" onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()" class="bg-orange-500 text-white font-black px-6 rounded-2xl uppercase text-xs shadow-lg hover:bg-orange-400 transition-colors">Go!</button>
         </div>
     </aside>
 
@@ -103,15 +106,15 @@
         let currentIndex = 0, currentWord = null, globalSpeech = window.speechSynthesis, activeBtn = null;
 
         async function init() {
-            try {
-                const res = await fetch('vocabulary.json');
-                allWords = await res.json();
-                changeCategory('All');
-                updateProgress();
-            } catch (e) { document.getElementById('char').innerText = "ERROR"; }
+            const res = await fetch('vocabulary.json');
+            allWords = await res.json();
+            changeCategory('All');
+            updateProgress();
         }
 
         function changeCategory(cat) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('category-active'));
+            document.getElementById('btn-' + cat).classList.add('category-active');
             sessionWords = (cat === 'All') ? [...allWords] : allWords.filter(w => w.category === cat);
             currentIndex = Math.floor(Math.random() * sessionWords.length);
             updateCard();
@@ -121,7 +124,7 @@
             currentWord = sessionWords[currentIndex];
             document.getElementById('char').innerText = currentWord.char;
             document.getElementById('pinyin').innerText = currentWord.pinyin;
-            document.getElementById('radical').innerText = `RADICAL: ${currentWord.radical}`;
+            document.getElementById('radical').innerText = `Radix: ${currentWord.radical}`;
             document.getElementById('meaning').innerText = currentWord.meaning;
             document.getElementById('example').innerText = currentWord.example;
             document.getElementById('example-trans').innerText = currentWord.exampleTrans;
@@ -129,8 +132,8 @@
         }
 
         function toggleStar() {
-            const char = currentWord.char;
-            learnedList = learnedList.includes(char) ? learnedList.filter(c => c !== char) : [...learnedList, char];
+            const c = currentWord.char;
+            learnedList = learnedList.includes(c) ? learnedList.filter(x => x !== c) : [...learnedList, c];
             localStorage.setItem('learned_chars', JSON.stringify(learnedList));
             updateCard(); updateProgress();
         }
@@ -139,7 +142,7 @@
             const count = learnedList.length;
             const pct = Math.round((count / allWords.length) * 100);
             document.getElementById('progress-bar').style.width = pct + '%';
-            document.getElementById('progress-text').innerText = `${count} / ${allWords.length} Learned`;
+            document.getElementById('progress-text').innerText = `${count} / ${allWords.length} Stars`;
             document.getElementById('progress-percent').innerText = pct + '%';
         }
 
@@ -151,12 +154,13 @@
             const vw = globalSpeech.getVoices();
             if (lang === 'hk') {
                 u.lang = 'zh-HK';
-                u.voice = vw.find(v => v.lang.includes('HK') || v.lang.includes('yue'));
+                u.voice = vw.find(v => v.name.includes('Sin-Ji')) || vw.find(v => v.lang.includes('HK'));
             } else if (lang === 'cn') {
                 u.lang = 'zh-CN';
                 u.voice = vw.find(v => (v.lang.includes('CN') || v.lang.includes('Hans')) && !v.name.includes('HK'));
             } else { u.lang = 'en-US'; }
-            u.rate = 0.8; globalSpeech.speak(u);
+            u.rate = 0.8; u.pitch = 1.1;
+            globalSpeech.speak(u);
         }
 
         function toggleAudio(btn) {
@@ -175,23 +179,23 @@
         async function sendMessage() {
             const inp = document.getElementById('user-input'); if (!inp.value.trim() || !currentWord) return;
             const hist = document.getElementById('chat-history');
-            const userTxt = inp.value.trim(); hist.innerHTML += `<div class="ai-chat-msg text-amber-500 border-amber-500/20">Query: ${userTxt}</div>`;
+            const txt = inp.value.trim(); hist.innerHTML += `<div class="bg-blue-500/10 p-4 rounded-3xl text-blue-600 text-xs ml-auto max-w-[80%] mb-4 font-bold border-2 border-blue-50 text-right">Student: ${txt}</div>`;
             inp.value = ''; const tid = 't-' + Date.now();
-            hist.innerHTML += `<div id="${tid}" class="ai-chat-msg text-slate-400 italic">Processing...</div>`;
+            hist.innerHTML += `<div id="${tid}" class="ai-chat-msg italic">Thinking...</div>`;
             hist.scrollTop = hist.scrollHeight;
             try {
-                const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: userTxt, word: currentWord.char }) });
+                const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: txt, word: currentWord.char }) });
                 const d = await r.json();
                 if (d.reply) {
                     const html = d.reply.split('[BREAK]').map(s => `
-                        <div class="mb-3 relative pr-8 text-slate-300 border-b border-white/5 pb-2">
+                        <div class="mb-3 relative pr-8">
                             <span class="segment-content">${s.trim()}</span>
                             <button onclick="toggleAudio(this)" class="speaker-sm absolute top-0 right-0">🔊</button>
                         </div>`).join('');
                     document.getElementById(tid).innerHTML = html;
                     document.getElementById(tid).classList.remove('italic');
                 }
-            } catch (e) { document.getElementById(tid).innerText = "ERROR"; }
+            } catch (e) { document.getElementById(tid).innerText = "Tutor is fixing the magic pen!"; }
             hist.scrollTop = hist.scrollHeight;
         }
 
