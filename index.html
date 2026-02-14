@@ -114,7 +114,13 @@
                     body: JSON.stringify({ message: userText, word: currentWord.char })
                 });
                 const data = await response.json();
-                document.getElementById(loadingId).innerText = data.reply;
+                if (data && data.reply) {
+                    document.getElementById(loadingId).innerText = data.reply;
+                } else if (data && data.error) {
+                    document.getElementById(loadingId).innerText = "Error: " + data.error;
+                } else {
+                    document.getElementById(loadingId).innerText = "The tutor is rebooting. Please try again.";
+                }
             } catch (error) {
                 document.getElementById(loadingId).innerText = "Secure connection error. Gateway unavailable.";
             }
