@@ -1,8 +1,7 @@
 {
   "users": [
-    { "username": "roland", "role": "admin" },
-    { "username": "vic", "role": "student" },
-    { "username": "guest", "role": "guest" }
-  ],
-  "security_note": "This data is context-only. Actual passwords must be set via Vercel Secret Hashes for maximum security."
+    { "username": "mcquus", "password": "Mcq@123451", "role": "student" },
+    { "username": "roland", "password": "Mcq@123451", "role": "admin" },
+    { "username": "vic", "password": "Mcq@123451", "role": "student" }
+  ]
 }

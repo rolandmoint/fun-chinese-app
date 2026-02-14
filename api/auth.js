@@ -5,27 +5,30 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { username, password } = req.body;
-  const APP_PASS = process.env.APP_PASS; // Master access password
 
-  // 1. Load Secure Registry
-  const registryPath = path.join(process.cwd(), 'api', 'registry.json');
-  const registryData = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  try {
+    // 1. Load Secure Registry
+    const registryPath = path.join(process.cwd(), 'api', 'registry.json');
+    const registryData = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
 
-  // 2. Validate User Existence
-  const userExists = registryData.users.find(u => u.username === username.toLowerCase());
+    // 2. Locate the specific user
+    const targetUser = registryData.users.find(u => u.username === username.toLowerCase());
 
-  if (!userExists) {
-    return res.status(401).json({ success: false, error: "Access Denied: Identity unknown." });
-  }
+    if (!targetUser) {
+      return res.status(401).json({ success: false, error: "Access Denied: Identity unknown." });
+    }
 
-  // 3. Validate Password (Linked to your Vercel Master Secret)
-  if (password === APP_PASS) {
-    return res.status(200).json({ 
-      success: true, 
-      token: "SECURE_SESSION_ID_" + Date.now(),
-      role: userExists.role 
-    });
-  } else {
-    return res.status(401).json({ success: false, error: "Invalid Credentials." });
+    // 3. Validate Individual Password
+    if (password === targetUser.password) {
+      return res.status(200).json({ 
+        success: true, 
+        token: "SECURE_SESSION_ID_" + Math.random().toString(36).substring(7),
+        role: targetUser.role 
+      });
+    } else {
+      return res.status(401).json({ success: false, error: "Invalid Credentials." });
+    }
+  } catch (error) {
+    return res.status(500).json({ success: false, error: "Auth System Error." });
   }
 }
