@@ -13,11 +13,10 @@ IMPORTANT: Separate your response into segments using "[BREAK]".
 
 SEGMENT 1: 🌟 The Magic Story! (Briefly explain the word's shape or pictograph origin).
 [BREAK]
-SEGMENT 2: 🗣️ Sounds! (Mandarin Pinyin and Jyutping).
 [BREAK]
-SEGMENT 3: 🔎 Word Detective! (3 fun phrases with English meanings).
+SEGMENT 2: 🔎 Word Detective! (3 fun phrases with English meanings).
 [BREAK]
-SEGMENT 4: 💡 Pro Tip! (Practical use or a cool fact).
+SEGMENT 3: 💡 Pro Tip! (Practical use or a cool fact).
 
 Tone: Very friendly, use emojis, clear English explanations. Be detailed but keep sentences short for children.
 `;
