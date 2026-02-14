@@ -148,20 +148,23 @@
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
 
         let currentUtterance = null;
+        let isActuallySpeaking = false; // 🔐 THE HARD LOCK
 
         function toggleAudio(btn) {
             const textContent = btn.parentElement.querySelector('.segment-text').innerText;
 
-            // 🛑 If currently speaking THIS segment, STOPlit
-            if (currentUtterance && currentUtterance.text === textContent) {
+            if (isActuallySpeaking && currentUtterance && currentUtterance.text === textContent) {
+                // 🛑 FORCE KILL EVERYTHING AND LOCK
                 window.speechSynthesis.cancel();
+                isActuallySpeaking = false;
                 currentUtterance = null;
                 btn.innerText = "🔊";
                 return;
             }
 
-            // 🛑 If speaking something else, cancel it and reset all buttons
+            // 🛑 RESET EVERYTHING ELSE
             window.speechSynthesis.cancel();
+            isActuallySpeaking = false;
             document.querySelectorAll('.audio-toggle').forEach(b => b.innerText = "🔊");
 
             const cleanText = textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
@@ -171,9 +174,11 @@
             const isChinese = /[\u4e00-\u9fa5]/.test(cleanText.substring(0, 50));
             utterance.lang = isChinese ? 'zh-HK' : 'en-US';
             
+            utterance.onstart = () => { isActuallySpeaking = true; };
             utterance.onend = () => { 
+                isActuallySpeaking = false; 
                 btn.innerText = "🔊"; 
-                if (currentUtterance === utterance) currentUtterance = null; 
+                currentUtterance = null; 
             };
             
             btn.innerText = "⏹️";
