@@ -5,17 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Grade 3 - Language Hub</title>
     <style>
-        /* --- CSS Styling (Security-Focused & Kid-friendly) --- */
         :root { --primary-color: #FF9F43; --secondary-color: #54a0ff; --bg-color: #f8fafc; --text-color: #1e293b; --card-bg: #ffffff; --cantonese-btn: #ff6b6b; }
         body { font-family: "Inter", "Segoe UI", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; height: 100vh; color: var(--text-color); overflow: hidden; }
         .learning-section { flex: 2; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
         .header-title { color: #334155; font-size: 28px; margin-bottom: 10px; text-align: center; }
         .flashcard { background: var(--card-bg); border-radius: 24px; padding: 40px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 90%; max-width: 550px; margin-bottom: 20px; border: 1px solid #f1f5f9; box-sizing: border-box; }
-        .chinese-char { font-size: 140px; color: var(--secondary-color); font-weight: 900; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); line-height: 1; font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; }
-        .chinese-char:hover { transform: scale(1.05); }
+        .chinese-char { font-size: 140px; color: var(--secondary-color); font-weight: 900; cursor: pointer; transition: transform 0.2s; line-height: 1; font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; }
         .pinyin { font-size: 24px; color: #94a3b8; margin-bottom: 10px; font-weight: 500; }
         .radical-tag { font-size: 14px; color: #64748b; background: #f1f5f9; padding: 6px 16px; border-radius: 20px; display: inline-block; margin: 15px 0; font-weight: bold; }
-        .english-meaning { font-size: 28px; color: var(--primary-color); margin: 10px 0; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+        .english-meaning { font-size: 28px; color: var(--primary-color); margin: 10px 0; font-weight: 800; text-transform: uppercase; }
         .example-section { margin-top: 30px; border-top: 2px dashed #f1f5f9; padding-top: 20px; text-align: left; }
         .example-sentence { font-size: 24px; font-family: "Microsoft JhengHei", sans-serif; margin-bottom: 8px; line-height: 1.4; color: #334155; }
         .controls { display: flex; gap: 15px; margin-top: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
@@ -31,7 +29,6 @@
         .ai-segment:last-child { border-bottom: none; }
         .audio-toggle { position: absolute; right: 5px; top: 10px; background: white; border: 1px solid #fde047; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         input { flex-grow: 1; padding: 14px; border-radius: 12px; border: 2px solid #f1f5f9; outline: none; transition: all 0.2s; font-size: 16px; }
-        input:focus { border-color: var(--primary-color); background: white; }
         .btn-send { background: var(--primary-color); color: white; border: none; border-radius: 12px; padding: 0 20px; cursor: pointer; font-weight: bold; }
         @media (max-width: 768px) { body { flex-direction: column; height: auto; overflow-y: auto; } .ai-sidebar { border-left: none; border-top: 1px solid #f1f5f9; height: 500px; } }
     </style>
@@ -39,7 +36,7 @@
 <body>
     <div class="learning-section">
         <h1 class="header-title">🎓 Digital Classroom - G3</h1>
-        <div class="flashcard" id="card-display"></div>
+        <div id="card-display" class="flashcard">Loading...</div>
         <div class="controls">
             <button class="main-btn btn-cantonese" onclick="speakText(currentWord.char, 'hk')">🔊 Cantonese</button>
             <button class="main-btn btn-mandarin" onclick="speakText(currentWord.char, 'cn')">🔊 Mandarin</button>
@@ -48,34 +45,37 @@
     </div>
 
     <div class="ai-sidebar">
-        <header>
-            <h3 style="margin:0">Secure AI Tutor</h3>
-            <p style="font-size:12px; color:#94a3b8">End-to-End Encrypted Session</p>
-        </header>
+        <header><h3 style="margin:0">Secure AI Tutor</h3><p style="font-size:12px; color:#94a3b8">End-to-End Encrypted Session</p></header>
         <div class="chat-history" id="chat-history">
-            <div class="message ai-msg">Hello! I'm your interactive tutor. Ask me anything about the word on the screen.</div>
+            <div class="message ai-msg">Hello! I'm your tutor. Ask me about the word on the screen.</div>
         </div>
         <div class="chat-input-area" style="display:flex; gap:8px;">
-            <input type="text" id="user-input" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="user-input" placeholder="Ask here..." onkeypress="handleKeyPress(event)">
             <button class="btn-send" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
     <script>
-        const vocabulary = [
-            { char: "春", pinyin: "chūn", radical: "日 (Sun)", meaning: "Spring", example: "春天來了，花兒開。", exampleTrans: "Spring is here, flowers are blooming." },
-            { char: "夏", pinyin: "xià", radical: "夂 (Walk)", meaning: "Summer", example: "夏天天氣很熱。", exampleTrans: "The weather is hot in summer." },
-            { char: "秋", pinyin: "cau1", radical: "禾 (Grain)", meaning: "Autumn", example: "秋天有涼風。", exampleTrans: "There is a cool breeze in autumn." },
-            { char: "冬", pinyin: "dōng", radical: "冫(Ice)", meaning: "Winter", example: "冬天會下雪。", exampleTrans: "It snows in winter." }
-        ];
-
+        let vocabulary = [];
         let currentIndex = 0;
-        let currentWord = vocabulary[0];
+        let currentWord = null;
+        let globalAudio = window.speechSynthesis;
+        let activeBtn = null;
+
+        async function loadVocabulary() {
+            try {
+                const response = await fetch('vocabulary.json');
+                vocabulary = await response.json();
+                if (vocabulary.length > 0) updateCard();
+            } catch (error) {
+                document.getElementById('card-display').innerText = "Error loading data.";
+            }
+        }
 
         function updateCard() {
+            if (!vocabulary.length) return;
             currentWord = vocabulary[currentIndex];
-            const card = document.getElementById('card-display');
-            card.innerHTML = `
+            document.getElementById('card-display').innerHTML = `
                 <div class="pinyin">${currentWord.pinyin}</div>
                 <div class="chinese-char" onclick="speakText('${currentWord.char}', 'cn')">${currentWord.char}</div>
                 <div class="radical-tag">Radical: ${currentWord.radical}</div>
@@ -90,19 +90,26 @@
         function nextCard() { currentIndex = (currentIndex + 1) % vocabulary.length; updateCard(); }
 
         function speakText(text, lang) {
-            window.speechSynthesis.cancel();
+            globalAudio.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang === 'hk' ? 'zh-HK' : 'zh-CN';
+            const voices = globalAudio.getVoices();
+            if (lang === 'hk') {
+                utterance.lang = 'zh-HK';
+                utterance.voice = voices.find(v => v.lang.includes('HK') || v.name.includes('Cantonese'));
+            } else {
+                utterance.lang = 'zh-CN';
+                utterance.voice = voices.find(v => v.lang.includes('CN') || v.name.includes('Mandarin'));
+            }
             utterance.rate = 0.8;
-            window.speechSynthesis.speak(utterance);
+            globalAudio.speak(utterance);
         }
 
         async function sendMessage() {
             const inputField = document.getElementById('user-input');
-            const history = document.getElementById('chat-history');
             const userText = inputField.value.trim();
-            if (!userText) return;
+            if (!userText || !currentWord) return;
 
+            const history = document.getElementById('chat-history');
             history.innerHTML += `<div class="message user-msg">${userText}</div>`;
             inputField.value = '';
             const loadingId = 'loading-' + Date.now();
@@ -110,7 +117,6 @@
             history.scrollTop = history.scrollHeight;
 
             try {
-                // 🔐 SECURITY UPGRADE: Points to your secure serverless backend instead of OpenRouter directly
                 const response = await fetch('/api/chat', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -119,84 +125,38 @@
                 const data = await response.json();
                 if (data && data.reply) {
                     const segments = data.reply.split('[BREAK]');
-                    let combinedHtml = '<div class="message ai-msg">';
-                    
-                    segments.forEach((seg, index) => {
-                        const trimmedSeg = seg.trim();
-                        if (trimmedSeg) {
-                            combinedHtml += `
-                                <div class="ai-segment">
-                                    <div class="segment-text">${trimmedSeg}</div>
-                                    <button class="audio-toggle" onclick="toggleAudio(this)" title="Listen">🔊</button>
-                                </div>
-                            `;
+                    let combinedHtml = '';
+                    segments.forEach(seg => {
+                        if (seg.trim()) {
+                            combinedHtml += `<div class="ai-segment"><div class="segment-text">${seg.trim()}</div><button class="audio-toggle" onclick="toggleAudio(this)">🔊</button></div>`;
                         }
                     });
-                    combinedHtml += '</div>';
-                    document.getElementById(loadingId).outerHTML = combinedHtml;
-                } else if (data && data.error) {
-                    document.getElementById(loadingId).innerText = "Error: " + data.error;
-                } else {
-                    document.getElementById(loadingId).innerText = "The tutor is rebooting. Please try again.";
+                    document.getElementById(loadingId).innerHTML = combinedHtml;
                 }
             } catch (error) {
-                document.getElementById(loadingId).innerText = "Secure connection error. Gateway unavailable.";
+                document.getElementById(loadingId).innerText = "Connection error.";
             }
             history.scrollTop = history.scrollHeight;
         }
 
-        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
-
-        let globalAudio = window.speechSynthesis;
-        let activeBtn = null;
-
         function toggleAudio(btn) {
             const textContent = btn.parentElement.querySelector('.segment-text').innerText;
-
-            if (activeBtn === btn) {
-                globalAudio.cancel();
-                activeBtn.innerText = "🔊";
-                activeBtn = null;
-                return;
-            }
-
+            if (activeBtn === btn) { globalAudio.cancel(); btn.innerText = "🔊"; activeBtn = null; return; }
             globalAudio.cancel();
             if (activeBtn) activeBtn.innerText = "🔊";
-
-            const cleanText = textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            
-            // 🎙️ PREMIUM VOICE SELECTION LOGIC
+            const utterance = new SpeechSynthesisUtterance(textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, ''));
             const voices = globalAudio.getVoices();
-            const isChinese = /[\u4e00-\u9fa5]/.test(cleanText.substring(0, 50));
-            
-            if (isChinese) {
-                // Try to find the highest quality Hong Kong voice (Sin-Ji, HiuGa, etc.)
-                const premiumHK = voices.find(v => (v.lang === 'zh-HK' || v.lang === 'zh_HK') && !v.name.includes('Google'));
-                const googleHK = voices.find(v => v.lang.includes('HK') && v.name.includes('Google'));
-                utterance.voice = premiumHK || googleHK || voices.find(v => v.lang.includes('HK'));
-                utterance.lang = 'zh-HK';
-            } else {
-                utterance.lang = 'en-US';
-                utterance.voice = voices.find(v => v.lang.includes('en-US') && v.name.includes('Samantha'));
-            }
-
-            utterance.rate = 0.8;
-            utterance.pitch = 1.1; // Make it sound slightly younger/friendlier
-            
-            utterance.onend = () => { 
-                if (activeBtn === btn) {
-                    btn.innerText = "🔊"; 
-                    activeBtn = null;
-                }
-            };
-            
-            btn.innerText = "⏹️";
-            activeBtn = btn;
+            const isChi = /[\u4e00-\u9fa5]/.test(textContent.substring(0, 50));
+            utterance.lang = isChi ? 'zh-HK' : 'en-US';
+            utterance.voice = voices.find(v => v.lang.includes(isChi ? 'HK' : 'US'));
+            utterance.rate = 0.8; utterance.pitch = 1.1;
+            utterance.onend = () => { if (activeBtn === btn) { btn.innerText = "🔊"; activeBtn = null; } };
+            btn.innerText = "⏹️"; activeBtn = btn;
             globalAudio.speak(utterance);
         }
 
-        updateCard();
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+        loadVocabulary();
     </script>
 </body>
 </html>
