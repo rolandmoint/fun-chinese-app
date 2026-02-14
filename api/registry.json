@@ -1,0 +1,8 @@
+{
+  "users": [
+    { "username": "roland", "role": "admin" },
+    { "username": "vic", "role": "student" },
+    { "username": "guest", "role": "guest" }
+  ],
+  "security_note": "This data is context-only. Actual passwords must be set via Vercel Secret Hashes for maximum security."
+}

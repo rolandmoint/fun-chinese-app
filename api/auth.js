@@ -1,20 +1,30 @@
-// 🛡️ SECURITY GATEKEEPER
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { username, password } = req.body;
-  
-  // 🔐 Credentials fetched from secure Vercel environment variables
-  const TARGET_USER = process.env.APP_USER;
-  const TARGET_PASS = process.env.APP_PASS;
+  const APP_PASS = process.env.APP_PASS; // Master access password
 
-  if (!TARGET_USER || !TARGET_PASS) {
-    return res.status(500).json({ success: false, error: "Auth system not configured." });
+  // 1. Load Secure Registry
+  const registryPath = path.join(process.cwd(), 'api', 'registry.json');
+  const registryData = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+
+  // 2. Validate User Existence
+  const userExists = registryData.users.find(u => u.username === username.toLowerCase());
+
+  if (!userExists) {
+    return res.status(401).json({ success: false, error: "Access Denied: Identity unknown." });
   }
 
-  if (username === TARGET_USER && password === TARGET_PASS) {
-    // Return a mock success token (In a full app, this would be a signed JWT)
-    return res.status(200).json({ success: true, token: "SECURE_SESSION_ACCESS_GRANT" });
+  // 3. Validate Password (Linked to your Vercel Master Secret)
+  if (password === APP_PASS) {
+    return res.status(200).json({ 
+      success: true, 
+      token: "SECURE_SESSION_ID_" + Date.now(),
+      role: userExists.role 
+    });
   } else {
     return res.status(401).json({ success: false, error: "Invalid Credentials." });
   }

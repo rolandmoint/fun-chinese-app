@@ -2,5 +2,14 @@
   "version": 2,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/api/registry.json",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "none" },
+        { "key": "Content-Type", "value": "application/json" }
+      ]
+    }
   ]
 }
