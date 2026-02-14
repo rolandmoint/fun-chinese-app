@@ -120,8 +120,8 @@
                 if (data && data.reply) {
                     const aiMsgHtml = `
                         <div class="message ai-msg">
-                            ${data.reply}
-                            <button class="audio-toggle" onclick="toggleAudio(this, '${data.reply.replace(/'/g, "\\'")}')" title="Play/Stop">🔊</button>
+                            <div class="ai-text-content">${data.reply}</div>
+                            <button class="audio-toggle" onclick="toggleAudio(this)" title="Play/Stop">🔊</button>
                         </div>
                     `;
                     document.getElementById(loadingId).outerHTML = aiMsgHtml;
@@ -140,23 +140,28 @@
 
         let currentUtterance = null;
 
-        function toggleAudio(btn, text) {
+        function toggleAudio(btn) {
+            // Get the text from its specific message container
+            const textContent = btn.parentElement.querySelector('.ai-text-content').innerText;
+
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
                 btn.innerText = "🔊";
-                if (currentUtterance && currentUtterance.text === text) {
+                // If it was already speaking This specific text, just stop.
+                if (currentUtterance && currentUtterance.text === textContent) {
                     currentUtterance = null;
                     return;
                 }
             }
 
-            const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
+            const cleanText = textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.rate = 0.85;
-            const isChinese = /[\u4e00-\u9fa5]/.test(text.substring(0, 50));
+            
+            const isChinese = /[\u4e00-\u9fa5]/.test(cleanText.substring(0, 50));
             utterance.lang = isChinese ? 'zh-HK' : 'en-US';
             
-            utterance.onend = () => { btn.innerText = "🔊"; };
+            utterance.onend = () => { btn.innerText = "🔊"; currentUtterance = null; };
             btn.innerText = "⏹️";
             
             currentUtterance = utterance;
