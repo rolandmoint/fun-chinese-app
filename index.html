@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grade 3 - Intelligence Core</title>
+    <title>Language Learning Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --primary: #f59e0b; --bg: #0f172a; --card: #ffffff; }
@@ -31,8 +31,8 @@
     <!-- Sidebar -->
     <aside class="sidebar w-80 p-6 flex flex-col gap-8 shrink-0">
         <div>
-            <h1 class="text-2xl font-black italic tracking-tighter text-amber-500">LEARNING CORE</h1>
-            <p class="text-slate-500 text-[10px] font-mono tracking-widest uppercase">G3 Module | Encrypted</p>
+            <h1 class="text-2xl font-black italic tracking-tighter text-amber-500 uppercase">Learning Core</h1>
+            <p class="text-slate-500 text-[10px] font-mono tracking-widest uppercase">G3 Module | Secured</p>
         </div>
 
         <div>
@@ -46,13 +46,14 @@
             </div>
         </div>
 
-        <nav class="space-y-2">
+        <nav class="space-y-2 overflow-y-auto pr-2">
             <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Modules</label>
-            <button onclick="changeCategory('All')" class="w-full text-left p-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-sm transition-colors text-white">🌐 Open All</button>
+            <button onclick="changeCategory('All')" class="w-full text-left p-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold text-sm text-white">🌐 Open All</button>
             <button onclick="changeCategory('Nature')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-blue-400 text-sm italic">🌿 Nature</button>
             <button onclick="changeCategory('Health')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-emerald-400 text-sm italic">💪 Health</button>
             <button onclick="changeCategory('Food')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-orange-400 text-sm italic">🍎 Food</button>
             <button onclick="changeCategory('Animals')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-red-400 text-sm italic">🦁 Animals</button>
+            <button onclick="changeCategory('School')" class="w-full text-left p-3 rounded-xl hover:bg-slate-700 text-purple-400 text-sm italic">📚 School</button>
         </nav>
     </aside>
 
@@ -62,7 +63,7 @@
             <button onclick="toggleStar()" id="star-btn" class="absolute top-6 right-6 text-slate-200 star-btn">⭐</button>
             
             <div id="pinyin" class="text-slate-400 text-xl font-medium mb-2 tracking-widest uppercase">Loading</div>
-            <div id="char" class="chinese-char font-black text-blue-600 mb-4 drop-shadow-sm" onclick="speakText(currentWord.char, 'hk')"></div>
+            <div id="char" class="chinese-char font-black text-blue-600 mb-4" onclick="speakText(currentWord.char, 'hk')"></div>
             <div id="radical" class="inline-block px-3 py-1 bg-slate-100 rounded-full text-[10px] font-black text-slate-400 mb-6 uppercase tracking-wider"></div>
             <div id="meaning" class="text-3xl font-black uppercase text-slate-800 mb-8 tracking-tighter italic"></div>
             
@@ -71,7 +72,10 @@
                     <p id="example" class="text-xl font-bold text-slate-700 leading-tight"></p>
                     <button onclick="speakText(currentWord.example, 'hk')" class="mt-1 bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-[10px]">🔊</button>
                 </div>
-                <p id="example-trans" class="text-sm italic text-slate-400"></p>
+                <div style="display:flex; align-items:start; gap:8px">
+                    <p id="example-trans" class="text-sm italic text-slate-400"></p>
+                    <button onclick="speakText(currentWord.exampleTrans, 'en')" class="mt-1 bg-slate-50 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center text-[8px]">🔊</button>
+                </div>
             </div>
         </div>
 
@@ -84,23 +88,19 @@
 
     <!-- AI Sidebar -->
     <aside class="ai-sidebar w-full lg:w-96 p-6 sidebar flex flex-col shrink-0">
-        <header class="mb-6"><h3 class="font-bold flex items-center gap-2">🤖 AI BOT <span class="bg-blue-500/20 text-blue-400 text-[8px] px-1 rounded">SECURED</span></h3></header>
+        <header class="mb-6"><h3 class="font-bold flex items-center gap-2">🤖 AI BOT <span class="bg-blue-500/20 text-blue-400 text-[8px] px-1 rounded uppercase font-mono">SECURED</span></h3></header>
         <div id="chat-history" class="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
-            <div class="ai-chat-msg text-slate-400 text-sm italic">Hello! Explore the words and ask me anything.</div>
+            <div class="ai-chat-msg text-slate-400 text-sm italic">Select a word and ask me for details!</div>
         </div>
         <div class="flex gap-2">
-            <input type="text" id="user-input" placeholder="Quick question..." class="flex-grow bg-slate-800 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-amber-500 transition-colors">
+            <input type="text" id="user-input" placeholder="Type..." class="flex-grow bg-slate-800 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-amber-500">
             <button onclick="sendMessage()" class="bg-amber-500 text-slate-900 font-bold px-4 rounded-xl uppercase text-xs">Ask</button>
         </div>
     </aside>
 
     <script>
-        let allWords = [];
-        let sessionWords = [];
-        let learnedList = JSON.parse(localStorage.getItem('learned_chars') || '[]');
-        let currentIndex = 0;
-        let currentWord = null;
-        let globalSpeech = window.speechSynthesis;
+        let allWords = [], sessionWords = [], learnedList = JSON.parse(localStorage.getItem('learned_chars') || '[]');
+        let currentIndex = 0, currentWord = null, globalSpeech = window.speechSynthesis, activeBtn = null;
 
         async function init() {
             try {
@@ -129,14 +129,10 @@
         }
 
         function toggleStar() {
-            if (learnedList.includes(currentWord.char)) {
-                learnedList = learnedList.filter(c => c !== currentWord.char);
-            } else {
-                learnedList.push(currentWord.char);
-            }
+            const char = currentWord.char;
+            learnedList = learnedList.includes(char) ? learnedList.filter(c => c !== char) : [...learnedList, char];
             localStorage.setItem('learned_chars', JSON.stringify(learnedList));
-            updateCard();
-            updateProgress();
+            updateCard(); updateProgress();
         }
 
         function updateProgress() {
@@ -155,47 +151,50 @@
             const vw = globalSpeech.getVoices();
             if (lang === 'hk') {
                 u.lang = 'zh-HK';
-                u.voice = vw.find(v => v.lang.includes('HK')) || vw.find(v => v.lang.includes('yue'));
+                u.voice = vw.find(v => v.lang.includes('HK') || v.lang.includes('yue'));
             } else if (lang === 'cn') {
                 u.lang = 'zh-CN';
-                u.voice = vw.find(v => v.lang.includes('CN')) || vw.find(v => v.lang.includes('Hans'));
+                u.voice = vw.find(v => (v.lang.includes('CN') || v.lang.includes('Hans')) && !v.name.includes('HK'));
             } else { u.lang = 'en-US'; }
-            u.rate = 0.8; u.pitch = 1.1;
-            globalSpeech.speak(u);
+            u.rate = 0.8; globalSpeech.speak(u);
+        }
+
+        function toggleAudio(btn) {
+            const textContent = btn.parentElement.querySelector('.segment-content').innerText;
+            if (activeBtn === btn) { globalSpeech.cancel(); btn.innerText = "🔊"; activeBtn = null; return; }
+            globalSpeech.cancel(); if (activeBtn) activeBtn.innerText = "🔊";
+            const u = new SpeechSynthesisUtterance(textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, ''));
+            const vw = globalSpeech.getVoices();
+            const isChi = /[\u4e00-\u9fa5]/.test(textContent.substring(0, 50));
+            u.lang = isChi ? 'zh-HK' : 'en-US';
+            u.voice = vw.find(v => v.lang.includes(isChi ? 'HK' : 'US'));
+            u.rate = 0.8; u.onend = () => { if (activeBtn === btn) { btn.innerText = "🔊"; activeBtn = null; } };
+            btn.innerText = "⏹️"; activeBtn = btn; globalSpeech.speak(u);
         }
 
         async function sendMessage() {
-            const inp = document.getElementById('user-input');
-            if (!inp.value.trim() || !currentWord) return;
+            const inp = document.getElementById('user-input'); if (!inp.value.trim() || !currentWord) return;
             const hist = document.getElementById('chat-history');
-            const userTxt = inp.value.trim(); hist.innerHTML += `<div class="ai-chat-msg border-blue-500/30 text-blue-400">User: ${userTxt}</div>`;
-            inp.value = '';
-            const tid = 't-' + Date.now();
+            const userTxt = inp.value.trim(); hist.innerHTML += `<div class="ai-chat-msg text-amber-500 border-amber-500/20">Query: ${userTxt}</div>`;
+            inp.value = ''; const tid = 't-' + Date.now();
             hist.innerHTML += `<div id="${tid}" class="ai-chat-msg text-slate-400 italic">Processing...</div>`;
             hist.scrollTop = hist.scrollHeight;
-
             try {
-                const r = await fetch('/api/chat', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: userTxt, word: currentWord.char })
-                });
+                const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: userTxt, word: currentWord.char }) });
                 const d = await r.json();
                 if (d.reply) {
                     const html = d.reply.split('[BREAK]').map(s => `
-                        <div class="mb-3 relative pr-8 text-slate-300">
-                            ${s.trim()}
-                            <button onclick="speakText('${s.trim().replace(/'/g,"\\\\'")}', 'hk')" class="speaker-sm absolute top-0 right-0">🔊</button>
-                        </div>
-                    `).join('');
+                        <div class="mb-3 relative pr-8 text-slate-300 border-b border-white/5 pb-2">
+                            <span class="segment-content">${s.trim()}</span>
+                            <button onclick="toggleAudio(this)" class="speaker-sm absolute top-0 right-0">🔊</button>
+                        </div>`).join('');
                     document.getElementById(tid).innerHTML = html;
                     document.getElementById(tid).classList.remove('italic');
                 }
-            } catch (e) { document.getElementById(tid).innerText = "Gateway Error."; }
+            } catch (e) { document.getElementById(tid).innerText = "ERROR"; }
             hist.scrollTop = hist.scrollHeight;
         }
 
-        // Voice list priming
         globalSpeech.onvoiceschanged = () => { globalSpeech.getVoices(); };
         init();
     </script>
