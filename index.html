@@ -152,17 +152,17 @@
         function toggleAudio(btn) {
             const textContent = btn.parentElement.querySelector('.segment-text').innerText;
 
-            if (window.speechSynthesis.speaking) {
+            // 🛑 If currently speaking THIS segment, STOPlit
+            if (currentUtterance && currentUtterance.text === textContent) {
                 window.speechSynthesis.cancel();
-                // If it was already speaking This specific text, just stop.
-                if (currentUtterance && currentUtterance.text === textContent) {
-                    btn.innerText = "🔊";
-                    currentUtterance = null;
-                    return;
-                }
-                // If it was speaking something else, stop that and reset all buttons
-                document.querySelectorAll('.audio-toggle').forEach(b => b.innerText = "🔊");
+                currentUtterance = null;
+                btn.innerText = "🔊";
+                return;
             }
+
+            // 🛑 If speaking something else, cancel it and reset all buttons
+            window.speechSynthesis.cancel();
+            document.querySelectorAll('.audio-toggle').forEach(b => b.innerText = "🔊");
 
             const cleanText = textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
             const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -171,9 +171,12 @@
             const isChinese = /[\u4e00-\u9fa5]/.test(cleanText.substring(0, 50));
             utterance.lang = isChinese ? 'zh-HK' : 'en-US';
             
-            utterance.onend = () => { btn.innerText = "🔊"; currentUtterance = null; };
-            btn.innerText = "⏹️";
+            utterance.onend = () => { 
+                btn.innerText = "🔊"; 
+                if (currentUtterance === utterance) currentUtterance = null; 
+            };
             
+            btn.innerText = "⏹️";
             currentUtterance = utterance;
             window.speechSynthesis.speak(utterance);
         }
