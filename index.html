@@ -10,12 +10,13 @@
         .learning-section { flex: 2; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
         .header-title { color: #334155; font-size: 28px; margin-bottom: 10px; text-align: center; }
         .flashcard { background: var(--card-bg); border-radius: 24px; padding: 40px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 90%; max-width: 550px; margin-bottom: 20px; border: 1px solid #f1f5f9; box-sizing: border-box; }
-        .chinese-char { font-size: 140px; color: var(--secondary-color); font-weight: 900; cursor: pointer; transition: transform 0.2s; line-height: 1; font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; }
+        .chinese-char { font-size: 140px; color: var(--secondary-color); font-weight: 900; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); line-height: 1; font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; }
         .pinyin { font-size: 24px; color: #94a3b8; margin-bottom: 10px; font-weight: 500; }
         .radical-tag { font-size: 14px; color: #64748b; background: #f1f5f9; padding: 6px 16px; border-radius: 20px; display: inline-block; margin: 15px 0; font-weight: bold; }
         .english-meaning { font-size: 28px; color: var(--primary-color); margin: 10px 0; font-weight: 800; text-transform: uppercase; }
         .example-section { margin-top: 30px; border-top: 2px dashed #f1f5f9; padding-top: 20px; text-align: left; }
-        .example-sentence { font-size: 24px; font-family: "Microsoft JhengHei", sans-serif; margin-bottom: 8px; line-height: 1.4; color: #334155; }
+        .example-sentence { font-size: 24px; font-family: "Microsoft JhengHei", sans-serif; margin-bottom: 8px; line-height: 1.4; color: #334155; display: flex; align-items: start; gap: 8px; }
+        .example-btn { background: #f1f5f9; border: none; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; margin-top: 4px; border: 1px solid #e2e8f0; }
         .controls { display: flex; gap: 15px; margin-top: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
         button.main-btn { padding: 14px 24px; font-size: 16px; border: none; border-radius: 16px; cursor: pointer; transition: all 0.2s; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.05); }
         .btn-cantonese { background-color: var(--cantonese-btn); color: white; }
@@ -47,10 +48,10 @@
     <div class="ai-sidebar">
         <header><h3 style="margin:0">Secure AI Tutor</h3><p style="font-size:12px; color:#94a3b8">End-to-End Encrypted Session</p></header>
         <div class="chat-history" id="chat-history">
-            <div class="message ai-msg">Hello! I'm your tutor. Ask me about the word on the screen.</div>
+            <div class="message ai-msg">Hello! I'm your interactive tutor. Ask me about the word on the screen.</div>
         </div>
         <div class="chat-input-area" style="display:flex; gap:8px;">
-            <input type="text" id="user-input" placeholder="Ask here..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="user-input" placeholder="Type your question..." onkeypress="handleKeyPress(event)">
             <button class="btn-send" onclick="sendMessage()">Send</button>
         </div>
     </div>
@@ -67,13 +68,10 @@
                 const response = await fetch('vocabulary.json');
                 vocabulary = await response.json();
                 if (vocabulary.length > 0) {
-                    // 🎲 NEW: Start with a random index
                     currentIndex = Math.floor(Math.random() * vocabulary.length);
                     updateCard();
                 }
-            } catch (error) {
-                document.getElementById('card-display').innerText = "Error loading data.";
-            }
+            } catch (error) { document.getElementById('card-display').innerText = "Error loading data."; }
         }
 
         function updateCard() {
@@ -85,8 +83,14 @@
                 <div class="radical-tag">Radical: ${currentWord.radical}</div>
                 <div class="english-meaning">${currentWord.meaning}</div>
                 <div class="example-section">
-                    <div class="example-sentence">${currentWord.example}</div>
-                    <div style="font-size:14px; color:#64748b; font-style:italic;">${currentWord.exampleTrans}</div>
+                    <div class="example-sentence">
+                        <span>${currentWord.example}</span>
+                        <button class="example-btn" onclick="speakText('${currentWord.example.replace(/'/g, "\\'")}', 'hk')">🔈</button>
+                    </div>
+                    <div style="font-size:14px; color:#64748b; font-style:italic; display:flex; align-items:start; gap:8px;">
+                        <span>${currentWord.exampleTrans}</span>
+                        <button class="example-btn" onclick="speakText('${currentWord.exampleTrans.replace(/'/g, "\\'")}', 'en')" style="width:20px; height:20px; font-size:10px;">🔈</button>
+                    </div>
                 </div>
             `;
         }
@@ -100,9 +104,12 @@
             if (lang === 'hk') {
                 utterance.lang = 'zh-HK';
                 utterance.voice = voices.find(v => v.lang.includes('HK') || v.name.includes('Cantonese'));
-            } else {
+            } else if (lang === 'cn') {
                 utterance.lang = 'zh-CN';
                 utterance.voice = voices.find(v => v.lang.includes('CN') || v.name.includes('Mandarin'));
+            } else {
+                utterance.lang = 'en-US';
+                utterance.voice = voices.find(v => v.lang.includes('US') || v.name.includes('Samantha'));
             }
             utterance.rate = 0.8;
             globalAudio.speak(utterance);
@@ -112,14 +119,12 @@
             const inputField = document.getElementById('user-input');
             const userText = inputField.value.trim();
             if (!userText || !currentWord) return;
-
             const history = document.getElementById('chat-history');
             history.innerHTML += `<div class="message user-msg">${userText}</div>`;
             inputField.value = '';
             const loadingId = 'loading-' + Date.now();
             history.innerHTML += `<div class="message ai-msg" id="${loadingId}">Thinking...</div>`;
             history.scrollTop = history.scrollHeight;
-
             try {
                 const response = await fetch('/api/chat', { 
                     method: 'POST',
@@ -129,25 +134,18 @@
                 const data = await response.json();
                 if (data && data.reply) {
                     const segments = data.reply.split('[BREAK]');
-                    let combinedHtml = '';
-                    segments.forEach(seg => {
-                        if (seg.trim()) {
-                            combinedHtml += `<div class="ai-segment"><div class="segment-text">${seg.trim()}</div><button class="audio-toggle" onclick="toggleAudio(this)">🔊</button></div>`;
-                        }
-                    });
-                    document.getElementById(loadingId).innerHTML = combinedHtml;
+                    let html = '';
+                    segments.forEach(seg => { if (seg.trim()) html += `<div class="ai-segment"><div class="segment-text">${seg.trim()}</div><button class="audio-toggle" onclick="toggleAudio(this)">🔊</button></div>`; });
+                    document.getElementById(loadingId).innerHTML = html;
                 }
-            } catch (error) {
-                document.getElementById(loadingId).innerText = "Connection error.";
-            }
+            } catch (error) { document.getElementById(loadingId).innerText = "Connection error."; }
             history.scrollTop = history.scrollHeight;
         }
 
         function toggleAudio(btn) {
             const textContent = btn.parentElement.querySelector('.segment-text').innerText;
             if (activeBtn === btn) { globalAudio.cancel(); btn.innerText = "🔊"; activeBtn = null; return; }
-            globalAudio.cancel();
-            if (activeBtn) activeBtn.innerText = "🔊";
+            globalAudio.cancel(); if (activeBtn) activeBtn.innerText = "🔊";
             const utterance = new SpeechSynthesisUtterance(textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, ''));
             const voices = globalAudio.getVoices();
             const isChi = /[\u4e00-\u9fa5]/.test(textContent.substring(0, 50));
@@ -155,8 +153,7 @@
             utterance.voice = voices.find(v => v.lang.includes(isChi ? 'HK' : 'US'));
             utterance.rate = 0.8; utterance.pitch = 1.1;
             utterance.onend = () => { if (activeBtn === btn) { btn.innerText = "🔊"; activeBtn = null; } };
-            btn.innerText = "⏹️"; activeBtn = btn;
-            globalAudio.speak(utterance);
+            btn.innerText = "⏹️"; activeBtn = btn; globalAudio.speak(utterance);
         }
 
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
