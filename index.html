@@ -116,6 +116,8 @@
                 const data = await response.json();
                 if (data && data.reply) {
                     document.getElementById(loadingId).innerText = data.reply;
+                    // 🗣️ NEW: AI Tutor reads the response out loud
+                    speakAIResponse(data.reply);
                 } else if (data && data.error) {
                     document.getElementById(loadingId).innerText = "Error: " + data.error;
                 } else {
@@ -128,6 +130,24 @@
         }
 
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+
+        // 🗣️ NEW: Dedicated logic for AI Tutor voice
+        function speakAIResponse(text) {
+            window.speechSynthesis.cancel();
+            
+            // Clean up emojis and special characters for smoother speech
+            const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 0.85; // Slightly slower for kids
+            
+            // Default to English, but check if content is mostly Chinese
+            const isChinese = /[\u4e00-\u9fa5]/.test(text.substring(0, 50));
+            utterance.lang = isChinese ? 'zh-HK' : 'en-US';
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
         updateCard();
     </script>
 </body>
