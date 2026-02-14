@@ -26,10 +26,10 @@
         .chat-history { flex-grow: 1; border-radius: 16px; padding: 15px; overflow-y: auto; margin: 20px 0; background: #fafafa; border: 1px solid #f1f5f9; }
         .message { margin-bottom: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; max-width: 95%; }
         .user-msg { background: #eff6ff; color: #1e40af; margin-left: auto; border-bottom-right-radius: 2px; }
-        .ai-msg { background: #fef9c3; color: #854d0e; border-bottom-left-radius: 2px; position: relative; }
-        .audio-toggle { position: absolute; right: -40px; top: 50%; transform: translateY(-50%); background: white; border: 1px solid #fde047; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .audio-toggle:hover { background: #fefce8; }
-        @media (max-width: 1024px) { .audio-toggle { right: 5px; top: -15px; transform: none; } }
+        .ai-msg { background: #fef9c3; color: #854d0e; border-bottom-left-radius: 2px; }
+        .ai-segment { position: relative; padding: 12px; border-bottom: 1px solid #fde047; margin-bottom: 8px; }
+        .ai-segment:last-child { border-bottom: none; }
+        .audio-toggle { position: absolute; right: 5px; top: 10px; background: white; border: 1px solid #fde047; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         input { flex-grow: 1; padding: 14px; border-radius: 12px; border: 2px solid #f1f5f9; outline: none; transition: all 0.2s; font-size: 16px; }
         input:focus { border-color: var(--primary-color); background: white; }
         .btn-send { background: var(--primary-color); color: white; border: none; border-radius: 12px; padding: 0 20px; cursor: pointer; font-weight: bold; }
@@ -118,13 +118,22 @@
                 });
                 const data = await response.json();
                 if (data && data.reply) {
-                    const aiMsgHtml = `
-                        <div class="message ai-msg">
-                            <div class="ai-text-content">${data.reply}</div>
-                            <button class="audio-toggle" onclick="toggleAudio(this)" title="Play/Stop">🔊</button>
-                        </div>
-                    `;
-                    document.getElementById(loadingId).outerHTML = aiMsgHtml;
+                    const segments = data.reply.split('[BREAK]');
+                    let combinedHtml = '<div class="message ai-msg">';
+                    
+                    segments.forEach((seg, index) => {
+                        const trimmedSeg = seg.trim();
+                        if (trimmedSeg) {
+                            combinedHtml += `
+                                <div class="ai-segment">
+                                    <div class="segment-text">${trimmedSeg}</div>
+                                    <button class="audio-toggle" onclick="toggleAudio(this)" title="Listen">🔊</button>
+                                </div>
+                            `;
+                        }
+                    });
+                    combinedHtml += '</div>';
+                    document.getElementById(loadingId).outerHTML = combinedHtml;
                 } else if (data && data.error) {
                     document.getElementById(loadingId).innerText = "Error: " + data.error;
                 } else {
@@ -141,17 +150,18 @@
         let currentUtterance = null;
 
         function toggleAudio(btn) {
-            // Get the text from its specific message container
-            const textContent = btn.parentElement.querySelector('.ai-text-content').innerText;
+            const textContent = btn.parentElement.querySelector('.segment-text').innerText;
 
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
-                btn.innerText = "🔊";
                 // If it was already speaking This specific text, just stop.
                 if (currentUtterance && currentUtterance.text === textContent) {
+                    btn.innerText = "🔊";
                     currentUtterance = null;
                     return;
                 }
+                // If it was speaking something else, stop that and reset all buttons
+                document.querySelectorAll('.audio-toggle').forEach(b => b.innerText = "🔊");
             }
 
             const cleanText = textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
