@@ -3,146 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Intelligence Education Hub</title>
+    <title>Grade 3 Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --primary: #FF9F43; --bg: #fffbeb; }
         body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); color: #1e293b; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        #auth-portal { position: fixed; inset: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(255, 251, 235, 0.8); display: flex; align-items: center; justify-content: center; }
+        #auth-portal { position: fixed; inset: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(255, 251, 235, 0.85); display: flex; align-items: center; justify-content: center; }
         .sidebar { background: #ffffff; border-right: 4px solid #fbbf24; }
-        .flashcard { background: #ffffff; border-radius: 40px; box-shadow: 0 15px 40px rgba(251, 191, 36, 0.15); border: 2px solid #ffffff; }
+        .flashcard { background: #ffffff; border-radius: 40px; box-shadow: 0 15px 40px rgba(251, 191, 36, 0.1); border: 2px solid #ffffff; }
         .chinese-char { font-size: clamp(80px, 15vw, 140px); line-height: 1; font-family: "Microsoft JhengHei", sans-serif; cursor: pointer; color: #3b82f6; transition: transform 0.2s; }
+        .chinese-char:active { transform: scale(0.9); }
         .audio-btn-main { transition: all 0.2s; box-shadow: 0 6px 0 rgba(0,0,0,0.05); }
-        .audio-btn-main:active { transform: translateY(4px); box-shadow: none; }
         .star-btn { font-size: 32px; transition: transform 0.2s; }
         .star-active { color: #fbbf24 !important; filter: drop-shadow(0 0 10px #fbbf24); }
-        .category-btn { background: #ffffff; border: 2px solid #fef3c7; color: #94a3b8; transition: all 0.2s; }
-        .category-active { background: #fbbf24 !important; color: #ffffff !important; border-color: #d97706 !important; box-shadow: 0 4px 0 #d97706; font-weight: 900; }
+        .category-active { background: #fbbf24 !important; color: #ffffff !important; border-color: #d97706 !important; font-weight: 900; }
+        .ai-chat-msg { background: #fefce8; border: 2px solid #fef3c7; border-radius: 20px; padding: 14px; margin-bottom: 12px; position: relative; font-size: 14px; }
+        .speaker-sm { background: #fbbf24; color: white; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; }
         @media (max-width: 1024px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
-            .sidebar { width: 100%; border-right: none; height: auto; border-bottom: 4px solid #fbbf24; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 4px solid #fbbf24; }
+            .main-content { min-height: 100vh; padding: 20px; }
             .ai-sidebar { height: 500px; border-top: 4px solid #fbbf24; border-left: none; }
         }
     </style>
 </head>
 <body class="hidden">
 
-    <!-- 🛡️ SECURITY PORTAL -->
     <div id="auth-portal">
         <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-sm text-center border-4 border-amber-100">
-            <h1 class="text-3xl font-black italic tracking-tighter text-orange-500 mb-2 uppercase">Secure Portal</h1>
-            <p class="text-slate-400 text-xs font-bold mb-8 uppercase tracking-widest">Verify authorization to continue</p>
-            <div class="space-y-4">
-                <input type="text" id="auth-user" placeholder="Username" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-amber-400 font-bold text-sm">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-amber-400 font-bold text-sm">
-                <button onclick="handleLogin()" id="login-btn" class="w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-orange-400 transition-all uppercase tracking-widest">Explore &rarr;</button>
+            <h1 class="text-3xl font-black italic text-orange-500 mb-2 uppercase">Secure Entry</h1>
+            <div class="space-y-4 pt-6">
+                <input type="text" id="auth-user" placeholder="Username" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-amber-400 font-bold">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-amber-400 font-bold">
+                <button onclick="handleLogin()" id="login-btn" class="w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest">Verify &rarr;</button>
             </div>
             <p id="auth-error" class="mt-4 text-red-400 text-[10px] font-bold uppercase"></p>
         </div>
     </div>
 
-    <!-- MAIN APP (Wrapped in body) -->
     <aside class="sidebar w-80 p-6 flex flex-col gap-8 shrink-0">
-        <header><h1 class="text-3xl font-black italic tracking-tighter text-orange-500 uppercase">Funny<br>Chinese</h1></header>
+        <header><h1 class="text-3xl font-black italic text-orange-500">FUN CHINESE</h1></header>
         <div>
             <div class="bg-amber-100 h-3 w-full rounded-full overflow-hidden mb-2">
-                <div id="progress-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-full w-0 transition-all duration-1000"></div>
+                <div id="progress-bar" class="bg-amber-500 h-full w-0 transition-all duration-1000"></div>
             </div>
             <div class="flex justify-between text-[10px] font-black text-amber-700 uppercase">
-                <span id="progress-text">0 / 50 Mastered</span><span id="progress-percent">0%</span>
+                <span id="progress-text">0 / 50</span><span id="progress-percent">0%</span>
             </div>
         </div>
-        <nav class="space-y-3 overflow-y-auto pr-2">
-            <button id="btn-All" onclick="changeCategory('All')" class="category-btn w-full text-left p-3 rounded-2xl text-sm category-active">🌈 Universal Hub</button>
-            <button id="btn-Nature" onclick="changeCategory('Nature')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🌿 Forest & Sky</button>
-            <button id="btn-Health" onclick="changeCategory('Health')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🦸 Strong Body</button>
-            <button id="btn-Food" onclick="changeCategory('Food')" class="category-btn w-full text-left p-3 rounded-2xl text-sm"> Sandwich Yummy</button>
-            <button id="btn-Animals" onclick="changeCategory('Animals')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🦁 Animal Friends</button>
-            <button id="btn-School" onclick="changeCategory('School')" class="category-btn w-full text-left p-3 rounded-2xl text-sm">🏫 Fun School</button>
+        <nav class="space-y-3">
+            <button id="btn-All" onclick="changeCategory('All')" class="w-full text-left p-3 rounded-2xl bg-white border border-amber-100 text-slate-400 category-active">🌐 All Topics</button>
+            <button id="btn-Nature" onclick="changeCategory('Nature')" class="w-full text-left p-3 rounded-2xl bg-white border border-amber-100 text-slate-400">🌿 Forest</button>
+            <button id="btn-Health" onclick="changeCategory('Health')" class="w-full text-left p-3 rounded-2xl bg-white border border-amber-100 text-slate-400">🦸 Health</button>
+            <button id="btn-Food" onclick="changeCategory('Food')" class="w-full text-left p-3 rounded-2xl bg-white border border-amber-100 text-slate-400">🥪 Food</button>
+            <button id="btn-Animals" onclick="changeCategory('Animals')" class="w-full text-left p-3 rounded-2xl bg-white border border-amber-100 text-slate-400">🦁 Animals</button>
         </nav>
     </aside>
 
-    <main class="flex-grow flex flex-col items-center justify-center p-6">
+    <main class="main-content flex-grow flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-lg p-8 lg:p-12 text-center relative flashcard text-slate-900">
-            <button onclick="toggleStar()" id="star-btn" class="absolute top-6 right-6 text-slate-200 star-btn hover:scale-125">⭐</button>
-            <div id="pinyin" class="text-amber-400 text-2xl font-bold mb-2 tracking-widest italic">...</div>
-            <div id="char" class="chinese-char font-black mb-4 drop-shadow-xl" onclick="speak('hk')"></div>
-            <div id="radical" class="inline-block px-4 py-1 bg-blue-50 rounded-full text-[10px] font-black text-blue-400 mb-8 uppercase border border-blue-100"></div>
-            <div id="meaning" class="text-4xl font-black uppercase text-slate-800 mb-10 tracking-tighter italic"></div>
+            <button onclick="toggleStar()" id="star-btn" class="absolute top-6 right-6 text-slate-200 star-btn">⭐</button>
+            <div id="pinyin" class="text-amber-400 text-2xl font-bold mb-2 tracking-widest uppercase">...</div>
+            <div id="char" class="chinese-char font-black mb-4" onclick="runSpeech(currentWord.char, 'hk')"></div>
+            <div id="radical" class="inline-block px-4 py-1 bg-blue-50 rounded-full text-[10px] font-black text-blue-400 mb-8 border border-blue-100"></div>
+            <div id="meaning" class="text-4xl font-black uppercase text-slate-800 mb-10 tracking-tighter"></div>
             <div class="border-t border-amber-50 pt-8 text-left space-y-4">
-                <div class="flex items-start justify-between">
+                <div class="flex justify-between items-start">
                     <p id="example" class="text-xl font-bold text-slate-600 leading-tight"></p>
-                    <button onclick="speak('hk', true)" class="bg-amber-400 text-white w-7 h-7 rounded-full flex items-center justify-center">🔊</button>
+                    <button onclick="runSpeech(currentWord.example, 'hk')" class="bg-amber-400 text-white w-7 h-7 rounded-full flex items-center justify-center">🔊</button>
                 </div>
-                <div class="flex items-start justify-between">
+                <div class="flex justify-between items-start">
                     <p id="example-trans" class="text-sm font-medium text-slate-400 italic"></p>
-                    <button onclick="speak('en', true)" class="bg-blue-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px]">🔊</button>
+                    <button onclick="runSpeech(currentWord.exampleTrans, 'en')" class="bg-blue-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px]">🔊</button>
                 </div>
             </div>
         </div>
         <div class="w-full max-w-lg mt-10 grid grid-cols-2 gap-4">
-            <button onclick="speak('hk')" class="audio-btn-main py-4 bg-orange-500 text-white rounded-3xl font-black text-sm border-b-4 border-orange-700">Cantonese</button>
-            <button onclick="speak('cn')" class="audio-btn-main py-4 bg-sky-500 text-white rounded-3xl font-black text-sm border-b-4 border-sky-700">Mandarin</button>
-            <button onclick="nextCard()" class="col-span-2 py-6 bg-white text-slate-900 rounded-3xl font-black text-2xl border-b-8 border-slate-200 active:border-0 active:translate-y-2">SURPRISE ME &rarr;</button>
+            <button onclick="runSpeech(currentWord.char, 'hk')" class="audio-btn-main py-4 bg-orange-500 text-white rounded-3xl font-black text-sm border-b-4 border-orange-700">🔊 Cantonese</button>
+            <button onclick="runSpeech(currentWord.char, 'cn')" class="audio-btn-main py-4 bg-sky-500 text-white rounded-3xl font-black text-sm border-b-4 border-sky-700">🔊 Mandarin</button>
+            <button onclick="nextCard()" class="col-span-2 py-6 bg-white text-slate-900 rounded-3xl font-black text-2xl border-b-8 border-slate-200 active:border-0 active:translate-y-2 transition-all">NEXT SURPRISE &rarr;</button>
         </div>
     </main>
 
-    <aside class="w-full lg:w-96 p-6 sidebar flex flex-col shrink-0">
-        <header class="mb-6 h-8"><h3 class="font-black flex items-center gap-2 text-slate-700">🤖 AI COACH</h3></header>
+    <aside class="ai-sidebar w-full lg:w-96 p-6 sidebar flex flex-col shrink-0 overflow-hidden">
+        <header class="mb-6"><h3 class="font-black text-slate-700">🤖 AI COACH</h3></header>
         <div id="chat-history" class="flex-grow overflow-y-auto mb-4 space-y-4 bg-slate-50/50 rounded-3xl p-4"></div>
         <div class="flex gap-2">
-            <input type="text" id="user-input" placeholder="Ask a question..." class="flex-grow bg-white border-2 border-amber-100 p-4 rounded-2xl text-sm outline-none focus:border-amber-400 shadow-sm" onkeypress="if(event.key==='Enter')sendMessage()">
-            <button onclick="sendMessage()" class="bg-orange-500 text-white font-black px-6 rounded-2xl shadow-lg">Go!</button>
+            <input type="text" id="user-input" placeholder="Ask anything..." class="flex-grow bg-white border-2 border-amber-100 p-4 rounded-2xl text-sm" onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()" class="bg-orange-500 text-white font-black px-6 rounded-2xl shadow-lg">GO</button>
         </div>
     </aside>
 
     <script>
         let allWords = [], sessionWords = [], learned = JSON.parse(localStorage.getItem('learned') || '[]'), idx = 0, currentWord = null;
-        const speech = window.speechSynthesis;
+        const globalSpeech = window.speechSynthesis;
 
-        // 🛡️ AUTH CHECK ON LOAD
         if (sessionStorage.getItem('auth_token')) { unlockUI(); } else { document.body.classList.remove('hidden'); }
 
         async function handleLogin() {
             const user = document.getElementById('auth-user').value;
             const pass = document.getElementById('auth-pass').value;
-            const btn = document.getElementById('login-btn');
-            btn.innerText = "AUTHENTICATING..."; btn.disabled = true;
-
+            const btn = document.getElementById('login-btn'); btn.innerText = "...";
             try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, password: pass })
-                });
+                const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass }) });
                 const data = await res.json();
-                if (data.success) {
-                    sessionStorage.setItem('auth_token', data.token);
-                    unlockUI();
-                } else {
-                    document.getElementById('auth-error').innerText = data.error;
-                    btn.innerText = "EXPLORE →"; btn.disabled = false;
-                }
-            } catch (e) {
-                document.getElementById('auth-error').innerText = "CONNECTION_FAIL";
-                btn.innerText = "EXPLORE →"; btn.disabled = false;
-            }
+                if (data.success) { sessionStorage.setItem('auth_token', data.token); unlockUI(); }
+                else { document.getElementById('auth-error').innerText = data.error; btn.innerText = "Verify →"; }
+            } catch (e) { document.getElementById('auth-error').innerText = "FAIL"; btn.innerText = "Verify →"; }
         }
 
-        function unlockUI() {
-            document.getElementById('auth-portal').style.display = 'none';
-            document.body.classList.remove('hidden');
-            init();
-        }
+        function unlockUI() { document.getElementById('auth-portal').style.display = 'none'; document.body.classList.remove('hidden'); init(); }
 
         async function init() {
-            const r = await fetch('vocabulary.json');
-            allWords = await r.json(); changeCategory('All'); updateProgress();
+            const r = await fetch('vocabulary.json'); allWords = await r.json();
+            changeCategory('All'); updateProgress();
         }
 
         function changeCategory(cat) {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('category-active'));
-            document.getElementById('btn-' + cat).classList.add('category-active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('category-active'));
+            const btn = document.getElementById('btn-' + cat); if(btn) btn.classList.add('category-active');
             sessionWords = (cat === 'All') ? [...allWords] : allWords.filter(w => w.category === cat);
             idx = Math.floor(Math.random() * sessionWords.length); updateCard();
         }
@@ -151,7 +130,7 @@
             currentWord = sessionWords[idx];
             document.getElementById('char').innerText = currentWord.char;
             document.getElementById('pinyin').innerText = currentWord.pinyin;
-            document.getElementById('radical').innerText = `Radix: ${currentWord.radical}`;
+            document.getElementById('radical').innerText = `RADICAL: ${currentWord.radical}`;
             document.getElementById('meaning').innerText = currentWord.meaning;
             document.getElementById('example').innerText = currentWord.example;
             document.getElementById('example-trans').innerText = currentWord.exampleTrans;
@@ -159,53 +138,57 @@
         }
 
         function toggleStar() {
-            learned = learned.includes(currentWord.char) ? learned.filter(x => x !== currentWord.char) : [...learned, currentWord.char];
+            const c = currentWord.char;
+            learned = learned.includes(c) ? learned.filter(x => x !== c) : [...learned, c];
             localStorage.setItem('learned', JSON.stringify(learned));
             updateCard(); updateProgress();
         }
 
         function updateProgress() {
-            const count = learned.length;
-            const pct = Math.round((count / allWords.length) * 100);
+            const pct = Math.round((learned.length / allWords.length) * 100);
             document.getElementById('progress-bar').style.width = pct + '%';
-            document.getElementById('progress-text').innerText = `${count} / ${allWords.length} Stars`;
+            document.getElementById('progress-text').innerText = learned.length + ' / 50';
             document.getElementById('progress-percent').innerText = pct + '%';
         }
 
         function nextCard() { idx = (idx + 1) % sessionWords.length; updateCard(); }
 
-        // 🚀 CLOUD TTS VIA GOOGLE
-        function speak(lang, isExample = false) {
-            const text = isExample ? (lang === 'en' ? currentWord.exampleTrans : currentWord.example) : currentWord.char;
-            const code = lang === 'hk' ? 'zh-HK' : (lang === 'cn' ? 'zh-CN' : 'en-US');
-            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${code}&q=${encodeURIComponent(text)}`);
-            audio.play();
+        // 🔊 ROBUST WEB SPEECH API (Native Browser Support)
+        function runSpeech(text, lang) {
+            globalSpeech.cancel();
+            const u = new SpeechSynthesisUtterance(text.replace(/[\u{1F300}-\u{1F9FF}]/gu, ''));
+            const vw = globalSpeech.getVoices();
+            if (lang === 'hk') {
+                u.lang = 'zh-HK';
+                u.voice = vw.find(v => v.name.includes('Sin-Ji')) || vw.find(v => v.lang.includes('HK')) || vw.find(v => v.lang.includes('yue'));
+            } else if (lang === 'cn') {
+                u.lang = 'zh-CN';
+                u.voice = vw.find(v => v.name.includes('Ting-Ting')) || vw.find(v => (v.lang.includes('CN') || v.lang.includes('Hans')) && !v.name.includes('HK'));
+            } else { u.lang = 'en-US'; }
+            u.rate = 0.8;
+            globalSpeech.speak(u);
         }
 
         async function sendMessage() {
             const inp = document.getElementById('user-input'); if (!inp.value.trim() || !currentWord) return;
-            const hist = document.getElementById('chat-history'); const userTxt = inp.value.trim();
-            hist.innerHTML += `<div class="bg-blue-500/10 p-4 rounded-3xl text-blue-600 text-xs ml-auto max-w-[80%] mb-4 font-bold border-2 border-blue-50 text-right">Student: ${userTxt}</div>`;
+            const hist = document.getElementById('chat-history'); const txt = inp.value.trim();
+            hist.innerHTML += `<div class="bg-blue-100 p-3 rounded-2xl text-blue-600 text-xs ml-auto mb-4 font-bold text-right">${txt}</div>`;
             inp.value = ''; const tid = 't-' + Date.now();
-            hist.innerHTML += `<div id="${tid}" class="ai-chat-msg italic">Generating...</div>`;
+            hist.innerHTML += `<div id="${tid}" class="ai-chat-msg italic">Thinking...</div>`;
             hist.scrollTop = hist.scrollHeight;
             try {
-                const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: userTxt, word: currentWord.char }) });
+                const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: txt, word: currentWord.char }) });
                 const d = await r.json();
                 if (d.reply) {
-                    document.getElementById(tid).innerHTML = d.reply.split('[BREAK]').map(s => `<div class="mb-3 relative pr-8"><span>${s.trim()}</span><button onclick="speakRaw('${s.trim().replace(/'/g,"\\\\'")}')" class="absolute top-0 right-0 text-[10px]">🔊</button></div>`).join('');
+                    document.getElementById(tid).innerHTML = d.reply.split('[BREAK]').map(s => `<div class="mb-3 relative pr-8"><span>${s.trim()}</span><button onclick="runSpeech('${s.trim().replace(/'/g,"\\\\'")}', 'hk')" class="speaker-sm absolute top-0 right-0">🔊</button></div>`).join('');
                     document.getElementById(tid).classList.remove('italic');
                 }
-            } catch (e) { document.getElementById(tid).innerText = "NETWORK_ERROR"; }
+            } catch (e) { document.getElementById(tid).innerText = "ERROR"; }
             hist.scrollTop = hist.scrollHeight;
         }
-
-        function speakRaw(text) {
-            const isChi = /[\u4e00-\u9fa5]/.test(text.substring(0, 30));
-            const code = isChi ? 'zh-HK' : 'en-US';
-            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${code}&q=${encodeURIComponent(text.replace(/[\u{1F300}-\u{1F9FF}]/gu, ''))}`);
-            audio.play();
-        }
+        
+        // Prime voices
+        globalSpeech.onvoiceschanged = () => globalSpeech.getVoices();
     </script>
 </body>
 </html>
