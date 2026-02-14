@@ -153,23 +153,13 @@
             globalSpeech.cancel();
             const u = new SpeechSynthesisUtterance(text.replace(/[\u{1F300}-\u{1F9FF}]/gu, ''));
             const vw = globalSpeech.getVoices();
-            
             if (lang === 'hk') {
                 u.lang = 'zh-HK';
-                // Find Cantonese
-                u.voice = vw.find(v => v.name.includes('Sin-Ji')) || 
-                          vw.find(v => v.lang.includes('HK')) || 
-                          vw.find(v => v.name.toLowerCase().includes('cantonese')) ||
-                          vw.find(v => v.lang.includes('yue'));
+                u.voice = vw.find(v => v.lang.includes('HK')) || vw.find(v => v.lang.includes('yue'));
             } else if (lang === 'cn') {
                 u.lang = 'zh-CN';
-                // 🚀 Aggressive Mandarin Picker: Look for anything Mandarin AND NOT Cantonese
-                u.voice = vw.find(v => v.name.includes('Ting-Ting')) || 
-                          vw.find(v => v.name.includes('Li-Mu')) ||
-                          vw.find(v => (v.lang.includes('CN') || v.lang.includes('Hans')) && !v.name.includes('HK')) ||
-                          vw.find(v => v.name.toLowerCase().includes('mandarin') && !v.name.toLowerCase().includes('hong kong'));
+                u.voice = vw.find(v => v.lang.includes('CN')) || vw.find(v => v.lang.includes('Hans'));
             } else { u.lang = 'en-US'; }
-            
             u.rate = 0.8; u.pitch = 1.1;
             globalSpeech.speak(u);
         }
