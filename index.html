@@ -66,7 +66,11 @@
             try {
                 const response = await fetch('vocabulary.json');
                 vocabulary = await response.json();
-                if (vocabulary.length > 0) updateCard();
+                if (vocabulary.length > 0) {
+                    // 🎲 NEW: Start with a random index
+                    currentIndex = Math.floor(Math.random() * vocabulary.length);
+                    updateCard();
+                }
             } catch (error) {
                 document.getElementById('card-display').innerText = "Error loading data.";
             }
