@@ -153,7 +153,6 @@
         function toggleAudio(btn) {
             const textContent = btn.parentElement.querySelector('.segment-text').innerText;
 
-            // 🛑 If clicking the ACTIVE button, stop it completely
             if (activeBtn === btn) {
                 globalAudio.cancel();
                 activeBtn.innerText = "🔊";
@@ -161,15 +160,29 @@
                 return;
             }
 
-            // 🛑 If something else was playing, stop it first
             globalAudio.cancel();
             if (activeBtn) activeBtn.innerText = "🔊";
 
-            // 🚀 Start new audio
             const cleanText = textContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '');
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.rate = 0.85;
-            utterance.lang = /[\u4e00-\u9fa5]/.test(cleanText.substring(0, 50)) ? 'zh-HK' : 'en-US';
+            
+            // 🎙️ PREMIUM VOICE SELECTION LOGIC
+            const voices = globalAudio.getVoices();
+            const isChinese = /[\u4e00-\u9fa5]/.test(cleanText.substring(0, 50));
+            
+            if (isChinese) {
+                // Try to find the highest quality Hong Kong voice (Sin-Ji, HiuGa, etc.)
+                const premiumHK = voices.find(v => (v.lang === 'zh-HK' || v.lang === 'zh_HK') && !v.name.includes('Google'));
+                const googleHK = voices.find(v => v.lang.includes('HK') && v.name.includes('Google'));
+                utterance.voice = premiumHK || googleHK || voices.find(v => v.lang.includes('HK'));
+                utterance.lang = 'zh-HK';
+            } else {
+                utterance.lang = 'en-US';
+                utterance.voice = voices.find(v => v.lang.includes('en-US') && v.name.includes('Samantha'));
+            }
+
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1; // Make it sound slightly younger/friendlier
             
             utterance.onend = () => { 
                 if (activeBtn === btn) {
