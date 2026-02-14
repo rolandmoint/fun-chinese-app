@@ -1,12 +1,10 @@
-// 🔐 SECURE GATEWAY AGENT - REFINED
+// 🔐 DIAGNOSTIC GATEWAY AGENT
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const { message, word } = req.body;
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
+  // STEP 1: KEY CHECK
   if (!OPENROUTER_API_KEY) {
-    return res.status(500).json({ reply: "Cloud Configuration Error: Missing API Key." });
+    return res.status(200).json({ reply: "DEBUG_: Environmental key NOT FOUND in Vercel settings." });
   }
 
   try {
@@ -14,28 +12,23 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY.trim()}`,
         'X-Title': 'Secure Grade 3 Tutor'
       },
       body: JSON.stringify({
         model: "google/gemini-2.0-flash-lite-preview-02-05:free",
-        messages: [
-          { role: "system", content: `You are a friendly Grade 3 tutor. Current word is ${word}. Concise English only.` },
-          { role: "user", content: message }
-        ]
+        messages: [{ role: "user", content: "hi" }]
       })
     });
 
     const data = await response.json();
     
-    // Safety check for data structure
-    if (data && data.choices && data.choices[0] && data.choices[0].message) {
-      const reply = data.choices[0].message.content;
-      return res.status(200).json({ reply });
+    if (response.status === 200) {
+      return res.status(200).json({ reply: "Connection Successful! AI says: " + data.choices[0].message.content });
     } else {
-      return res.status(500).json({ reply: "Provider communication error." });
+      return res.status(200).json({ reply: `DEBUG_: Provider returned error ${response.status}: ${JSON.stringify(data.error)}` });
     }
   } catch (error) {
-    return res.status(500).json({ reply: "Gateway Security Failure." });
+    return res.status(200).json({ reply: "DEBUG_: Critical network failure: " + error.message });
   }
 }
