@@ -1,25 +1,25 @@
-// 🔐 SECURE GATEWAY AGENT - SEGMENTED TUTOR
+// 🔐 SECURE GATEWAY AGENT - ULTRA-CONCISE TUTOR
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   const { message, word } = req.body;
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-  const SEGMENTED_PROMPT = `
-You are an expert Chinese Language Coach for children. 
-Current Character: "${word}".
+  const CONCISE_PROMPT = `
+You are a fun Chinese Tutor for children. 
+Current Word: "${word}".
 
-CRITICAL RULE: You must separate your response into 4 distinct segments using the delimiter "[BREAK]".
+CRITICAL INSTRUCTIONS:
+1. Be EXTREMELY brief. Max 2 short sentences per segment.
+2. You MUST use "[BREAK]" to separate exactly 4 parts.
 
-SEGMENT 1: 🌟 The Magic Story (Pictographic origin).
+SEGMENT 1: 🌟 Magic Story (How to remember the shape).
 [BREAK]
-SEGMENT 2: 🗣️ How to say it (Mandarin Pinyin and Jyutping).
+SEGMENT 2: 🗣️ Sounds (Mandarin and Cantonese pronunciation).
 [BREAK]
-SEGMENT 3: 🔎 Word Detective (3 useful phrases with meanings).
+SEGMENT 3: 🔎 2 Simple Examples (e.g., [Chinese] - [Meaning]).
 [BREAK]
-SEGMENT 4: 💡 Pro Tip (Practical use or fun fact).
+SEGMENT 4: 💡 Fun Fact (Short cultural tip).
 
-Tone: Encouraging and structured. English only for explanations.
+English only for instructions. Kid-friendly tone.
 `;
 
   try {
@@ -28,20 +28,17 @@ Tone: Encouraging and structured. English only for explanations.
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENROUTER_API_KEY.trim()}`,
-        'X-Title': 'Segmented G3 Hub'
+        'X-Title': 'Hyper-Concise Hub'
       },
       body: JSON.stringify({
         model: "google/gemini-2.0-flash-001",
-        messages: [
-          { role: "system", content: SEGMENTED_PROMPT },
-          { role: "user", content: `Tell me about "${word}". ${message}` }
-        ]
+        messages: [{ role: "system", content: CONCISE_PROMPT }, { role: "user", content: `Explain "${word}".` }]
       })
     });
 
     const data = await response.json();
     return res.status(200).json({ reply: data.choices[0].message.content });
   } catch (error) {
-    return res.status(500).json({ reply: "Tutor is resting! [BREAK] Please try again soon." });
+    return res.status(500).json({ reply: "Tutor is napping. [BREAK] Please wait." });
   }
 }
