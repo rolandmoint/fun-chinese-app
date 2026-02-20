@@ -107,7 +107,13 @@ export default async function handler(req, res) {
     if (passwordValid) {
       // Update last login
       targetUser.lastLogin = new Date().toISOString();
-      fs.writeFileSync(registryPath, JSON.stringify(registryData, null, 2));
+      
+      // Try to update lastLogin in registry.json (don't fail the whole login if write fails)
+      try {
+        fs.writeFileSync(registryPath, JSON.stringify(registryData, null, 2));
+      } catch (writeErr) {
+        console.warn('Could not update lastLogin:', writeErr);
+      }
       
       // Clear login attempts on success
       loginAttempts.delete(clientIP);
