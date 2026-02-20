@@ -66,15 +66,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: "Username and password required." });
     }
 
-    // Sanitize
+    // Sanitize - Now case-insensitive for username lookup
     const cleanUsername = username.toLowerCase().trim();
     
     // Load registry
     const registryPath = path.join(process.cwd(), 'api', 'registry.json');
-    const registryData = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+    const registryDataStr = fs.readFileSync(registryPath, 'utf8');
+    const registryData = JSON.parse(registryDataStr);
 
-    // Find user
-    const targetUser = registryData.users.find(u => u.username === cleanUsername);
+    // Find user - Case-insensitive match against username in registry
+    const targetUser = registryData.users.find(u => u.username.toLowerCase() === cleanUsername);
 
     if (!targetUser) {
       // Generic error to prevent username enumeration
@@ -89,21 +90,18 @@ export default async function handler(req, res) {
     // Verify password (support both old plain text and new hashed)
     let passwordValid = false;
     
+    // Check legacyPasswords map from registry.json
+    const legacyPassword = (registryData.legacyPasswords && (registryData.legacyPasswords[cleanUsername] || registryData.legacyPasswords[username.trim()]));
+    
     if (targetUser.passwordHash && targetUser.salt) {
       // New format: hashed password
       passwordValid = verifyPassword(password, targetUser.salt, targetUser.passwordHash);
     } else if (targetUser.password) {
-      // Old format: plain text (migration path)
+      // Old format: plain text inside user object
       passwordValid = (password === targetUser.password);
-      
-      // Auto-migrate to hashed password on successful login
-      if (passwordValid) {
-        const { salt, hash } = await hashPassword(password);
-        targetUser.passwordHash = hash;
-        targetUser.salt = salt;
-        delete targetUser.password; // Remove plain text
-        fs.writeFileSync(registryPath, JSON.stringify(registryData, null, 2));
-      }
+    } else if (legacyPassword) {
+      // Compatibility with registry's top-level legacyPasswords map
+      passwordValid = (password === legacyPassword);
     }
 
     if (passwordValid) {
