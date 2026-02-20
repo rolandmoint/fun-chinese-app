@@ -9,9 +9,11 @@
   },
   "legacyPasswords": {
     "roland": "Mcq@123451",
+    "Roland": "Mcq@123451",
     "mcquus": "Mcq@123451",
     "vic": "Mcq@123451",
-    "test": "test1234"
+    "test": "test1234",
+    "Test": "test1234"
   },
   "users": [
     {
@@ -21,42 +23,16 @@
       "role": "admin",
       "isActive": true,
       "emailVerified": true,
-      "createdAt": "2026-02-01T00:00:00Z",
-      "lastLogin": null,
-      "_note": "Password will be hashed on first login"
-    },
-    {
-      "id": "student_mcquus_001",
-      "username": "mcquus",
-      "email": "mcquus@family.local",
-      "role": "student",
-      "isActive": true,
-      "emailVerified": true,
-      "createdAt": "2026-02-01T00:00:00Z",
-      "lastLogin": null,
-      "_note": "Password will be hashed on first login"
-    },
-    {
-      "id": "student_vic_001",
-      "username": "vic",
-      "email": "portugal.lx.mo@gmail.com",
-      "role": "student",
-      "isActive": true,
-      "emailVerified": true,
-      "createdAt": "2026-02-01T00:00:00Z",
-      "lastLogin": null,
-      "_note": "Password will be hashed on first login"
+      "createdAt": "2026-02-01T00:00:00Z"
     },
     {
       "id": "user_test_001",
-      "username": "test",
+      "username": "Test",
       "email": "test@example.com",
       "role": "student",
       "isActive": true,
       "emailVerified": true,
-      "createdAt": "2026-02-21T00:00:00Z",
-      "lastLogin": null,
-      "_note": "Temporary test user"
+      "createdAt": "2026-02-21T00:00:00Z"
     }
   ]
 }
