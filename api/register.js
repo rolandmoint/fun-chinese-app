@@ -1,14 +1,12 @@
-// 🔐 SECURE REGISTRATION API - OPTIMIZED FOR VERCEL (ASYNC)
-import fs from 'fs';
-import path from 'path';
+// 🔐 SECURE REGISTRATION API - MONGODB OPTIMIZED
 import crypto from 'crypto';
 import util from 'util';
+import clientPromise from './lib/mongodb.js';
 
-// Promisify pbkdf2 to avoid blocking the main thread
 const pbkdf2Async = util.promisify(crypto.pbkdf2);
 
 const CONFIG = {
-  MAX_USERS: 50,          
+  MAX_USERS: 100,          
   RATE_LIMIT_WINDOW: 3600000,  
   MAX_ATTEMPTS_PER_IP: 5,  
   MIN_PASSWORD_LENGTH: 8,
@@ -33,7 +31,6 @@ function validatePassword(password) {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/.test(password);
 }
 
-// ✅ Async Hash prevents node.js event loop blocking
 async function hashPasswordAsync(password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const hashBuffer = await pbkdf2Async(password, salt, 10000, 64, 'sha512');
@@ -82,18 +79,28 @@ export default async function handler(req, res) {
     if (!validateEmail(cleanEmail)) return res.status(400).json({ success: false, error: 'Invalid email format.' });
     if (!validatePassword(password)) return res.status(400).json({ success: false, error: 'Password must be at least 8 characters with uppercase, lowercase, and number.' });
     
-    // TEMPORARY DB LOGIC
-    const registryPath = path.join(process.cwd(), 'api', 'registry.json');
-    const registryData = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+    // Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db('fun_chinese_db');
+    const usersCollection = db.collection('users');
     
-    if (registryData.users.length >= CONFIG.MAX_USERS) {
+    // Check limits via DB
+    const userCount = await usersCollection.countDocuments();
+    if (userCount >= CONFIG.MAX_USERS) {
       return res.status(403).json({ success: false, error: 'Registration limit reached.' });
     }
     
-    const existingUser = registryData.users.find(u => u.username === cleanUsername || u.email === cleanEmail);
+    // Check if user exists (case insensitive finding)
+    const existingUser = await usersCollection.findOne({
+      $or: [
+        { username: cleanUsername },
+        { email: cleanEmail }
+      ]
+    });
+    
     if (existingUser) return res.status(409).json({ success: false, error: 'Username or email already registered.' });
     
-    // 🚀 Use Async Hashing for better performance
+    // Hash and Save
     const { salt, hash } = await hashPasswordAsync(password);
     
     const newUser = {
@@ -109,14 +116,14 @@ export default async function handler(req, res) {
       emailVerified: false
     };
     
-    registryData.users.push(newUser);
+    // Insert into DB
+    await usersCollection.insertOne(newUser);
     
-    // FATAL FLAW VERCEL: fs.writeFileSync doesn't permanently save data on serverless
-    try {
-      fs.writeFileSync(registryPath, JSON.stringify(registryData, null, 2));
-    } catch(e) {}
-    
-    return res.status(201).json({ success: true, message: 'Registration successful!', user: { id: newUser.id, username: newUser.username, role: newUser.role } });
+    return res.status(201).json({ 
+      success: true, 
+      message: 'Registration successful!', 
+      user: { id: newUser.id, username: newUser.username, role: newUser.role } 
+    });
     
   } catch (error) {
     console.error('Registration error:', error);
