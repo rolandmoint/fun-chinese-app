@@ -1,7 +1,11 @@
-// 🔐 SECURE LOGIN API - UPDATED FOR HASHED PASSWORDS
+// 🔐 SECURE LOGIN API - OPTIMIZED FOR VERCEL (ASYNC)
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import util from 'util';
+
+// Promisify pbkdf2 to avoid blocking the main thread
+const pbkdf2Async = util.promisify(crypto.pbkdf2);
 
 // Rate limiting for login
 const loginAttempts = new Map();
@@ -28,105 +32,74 @@ function checkLoginRateLimit(clientIP) {
   return { allowed: true };
 }
 
-// Verify password against hash
-function verifyPassword(password, salt, hash) {
-  const computedHash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
-  return computedHash === hash;
+// Verify password asynchronously
+async function verifyPasswordAsync(password, salt, hash) {
+  const computedHashBuffer = await pbkdf2Async(password, salt, 10000, 64, 'sha512');
+  return computedHashBuffer.toString('hex') === hash;
 }
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { username, password } = req.body;
   const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
   try {
-    // Rate limiting check
     const rateCheck = checkLoginRateLimit(clientIP);
     if (!rateCheck.allowed) {
-      return res.status(429).json({ 
-        success: false, 
-        error: `Too many login attempts. Try again in ${rateCheck.retryAfter} minutes.` 
-      });
+      return res.status(429).json({ success: false, error: `Too many login attempts. Try again in ${rateCheck.retryAfter} minutes.` });
     }
 
-    // Validate input
     if (!username || !password) {
       return res.status(400).json({ success: false, error: "Username and password required." });
     }
 
-    // Sanitize - Now case-insensitive for username lookup
     const cleanUsername = username.toLowerCase().trim();
     
-    // Load registry
+    // TEMPORARY JSON DB LOGIC - To be replaced by MongoDB/SQL
     const registryPath = path.join(process.cwd(), 'api', 'registry.json');
     const registryDataStr = fs.readFileSync(registryPath, 'utf8');
     const registryData = JSON.parse(registryDataStr);
 
-    // Find user - Case-insensitive match against username in registry
     const targetUser = registryData.users.find(u => u.username.toLowerCase() === cleanUsername);
 
-    if (!targetUser) {
-      // Generic error to prevent username enumeration
-      return res.status(401).json({ success: false, error: "Invalid credentials." });
-    }
+    if (!targetUser) return res.status(401).json({ success: false, error: "Invalid credentials." });
+    if (targetUser.isActive === false) return res.status(403).json({ success: false, error: "Account disabled." });
 
-    // Check if account is active
-    if (targetUser.isActive === false) {
-      return res.status(403).json({ success: false, error: "Account disabled." });
-    }
-
-    // Verify password (support both old plain text and new hashed)
     let passwordValid = false;
-    
-    // Check legacyPasswords map from registry.json
     const legacyPassword = (registryData.legacyPasswords && (registryData.legacyPasswords[cleanUsername] || registryData.legacyPasswords[username.trim()]));
     
     if (targetUser.passwordHash && targetUser.salt) {
-      // New format: hashed password
-      passwordValid = verifyPassword(password, targetUser.salt, targetUser.passwordHash);
+      // ✅ Await async check so thread isn't blocked!
+      passwordValid = await verifyPasswordAsync(password, targetUser.salt, targetUser.passwordHash);
     } else if (targetUser.password) {
-      // Old format: plain text inside user object
       passwordValid = (password === targetUser.password);
     } else if (legacyPassword) {
-      // Compatibility with registry's top-level legacyPasswords map
       passwordValid = (password === legacyPassword);
     }
 
     if (passwordValid) {
-      // Update last login
       targetUser.lastLogin = new Date().toISOString();
       
-      // Try to update lastLogin in registry.json (don't fail the whole login if write fails)
+      // Note: WriteFileSync on Vercel is ephemeral. 
+      // It won't persist across lambda spins. Needs Real DB.
       try {
         fs.writeFileSync(registryPath, JSON.stringify(registryData, null, 2));
       } catch (writeErr) {
-        console.warn('Could not update lastLogin:', writeErr);
+        // expected to fail on true serverless
       }
       
-      // Clear login attempts on success
       loginAttempts.delete(clientIP);
-      
       return res.status(200).json({ 
         success: true, 
         token: "SECURE_SESSION_" + crypto.randomUUID(),
         role: targetUser.role,
-        user: {
-          id: targetUser.id || 'legacy_' + cleanUsername,
-          username: targetUser.username,
-          email: targetUser.email || null
-        }
+        user: { id: targetUser.id || 'legacy_' + cleanUsername, username: targetUser.username, email: targetUser.email || null }
       });
     } else {
       return res.status(401).json({ success: false, error: "Invalid credentials." });
@@ -135,11 +108,4 @@ export default async function handler(req, res) {
     console.error('Auth error:', error);
     return res.status(500).json({ success: false, error: "Authentication system error." });
   }
-}
-
-// Helper for auto-migration
-async function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
-  return { salt, hash };
 }
