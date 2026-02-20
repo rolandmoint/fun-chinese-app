@@ -1,16 +1,28 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-17",
+  "lastUpdated": "2026-02-21",
+  "security": {
+    "maxUsers": 50,
+    "passwordMinLength": 8,
+    "requireEmailVerification": false,
+    "rateLimitEnabled": true
+  },
+  "legacyPasswords": {
+    "roland": "Mcq@123451",
+    "mcquus": "Mcq@123451",
+    "vic": "Mcq@123451",
+    "test": "test1234"
+  },
   "users": [
     {
       "id": "admin_roland_001",
       "username": "roland",
       "email": "roland.mo.int@gmail.com",
       "role": "admin",
-      "createdAt": "2026-02-01T00:00:00Z",
-      "lastLogin": null,
       "isActive": true,
       "emailVerified": true,
+      "createdAt": "2026-02-01T00:00:00Z",
+      "lastLogin": null,
       "_note": "Password will be hashed on first login"
     },
     {
@@ -18,10 +30,10 @@
       "username": "mcquus",
       "email": "mcquus@family.local",
       "role": "student",
-      "createdAt": "2026-02-01T00:00:00Z",
-      "lastLogin": null,
       "isActive": true,
       "emailVerified": true,
+      "createdAt": "2026-02-01T00:00:00Z",
+      "lastLogin": null,
       "_note": "Password will be hashed on first login"
     },
     {
@@ -29,22 +41,22 @@
       "username": "vic",
       "email": "portugal.lx.mo@gmail.com",
       "role": "student",
-      "createdAt": "2026-02-01T00:00:00Z",
-      "lastLogin": null,
       "isActive": true,
       "emailVerified": true,
+      "createdAt": "2026-02-01T00:00:00Z",
+      "lastLogin": null,
       "_note": "Password will be hashed on first login"
+    },
+    {
+      "id": "user_test_001",
+      "username": "test",
+      "email": "test@example.com",
+      "role": "student",
+      "isActive": true,
+      "emailVerified": true,
+      "createdAt": "2026-02-21T00:00:00Z",
+      "lastLogin": null,
+      "_note": "Temporary test user"
     }
-  ],
-  "legacyPasswords": {
-    "roland": "Mcq@123451",
-    "mcquus": "Mcq@123451",
-    "vic": "Mcq@123451"
-  },
-  "security": {
-    "maxUsers": 50,
-    "requireEmailVerification": false,
-    "passwordMinLength": 8,
-    "rateLimitEnabled": true
-  }
+  ]
 }
