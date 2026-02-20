@@ -193,6 +193,14 @@
 
         function nextCard() { idx = (idx + 1) % sessionWords.length; updateCard(); }
 
+        // 🛠️ FIX: Added missing runSpeech function
+        function runSpeech(lang, type) {
+            if (!currentWord) return;
+            const text = (type === 'word') ? currentWord.char : currentWord.example;
+            const btn = event.currentTarget;
+            coreSpeak(text, lang, btn);
+        }
+
         function coreSpeak(text, lang, btn) {
             if (activeSpeakerBtn === btn) { synth.cancel(); resetBtn(); return; }
             synth.cancel(); if (activeSpeakerBtn) resetBtn();
